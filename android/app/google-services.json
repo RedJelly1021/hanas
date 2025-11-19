@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1091780394304",
+    "project_id": "hanas-talk",
+    "storage_bucket": "hanas-talk.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1091780394304:android:fde0fd51e508e810060ea5",
+        "android_client_info": {
+          "package_name": "com.example.hanas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFiptgQzsHHFt9dC8Q_Q0x7zJlAu_OyMI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1091780394304:android:2180c08f6eda5a39060ea5",
+        "android_client_info": {
+          "package_name": "hanas.talk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFiptgQzsHHFt9dC8Q_Q0x7zJlAu_OyMI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
