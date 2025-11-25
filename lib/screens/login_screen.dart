@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hanas/providers/theme_provider.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget
 {
@@ -38,14 +40,18 @@ class _LoginScreenState extends State<LoginScreen>
 
     //TODO: 실제 로그인 로직은 나중에 Firebase 붙일 때 넣기
     Navigator.pushReplacementNamed(context, '/friends'); //친구 목록 화면으로 이동
+    //Navigator.pushReplacementNamed(context, '/chatList'); //원하면 로그인 성공 시 채팅 목록 화면으로 이동
+    //Navigator.pushReplacementNamed(context, '/home'); //원하면 로그인 성공 시 Home(Friends+Chats) 화면으로 이동
   }
 
   @override
   Widget build(BuildContext context) //빌드 메서드
   {
+    final theme = Provider.of<ThemeProvider>(context).currentTheme; //현재 테마 가져오기
+
     return Scaffold //기본 화면 구조
     (
-      backgroundColor: const Color(0xFFFFDDEB), //연한 핑크색 배경
+      backgroundColor: theme.background, //연한 핑크색 배경
       body: Padding //전체 패딩
       (
         padding: const EdgeInsets.all(24.0), //모든 방향에 24픽셀 패딩
@@ -56,20 +62,20 @@ class _LoginScreenState extends State<LoginScreen>
             mainAxisSize: MainAxisSize.min, //중앙에 모이도록 설정
             children:  //위젯들
             [
-              const Text //앱 로고
+              Text //앱 로고
               (
-                '🌸',
-                style: TextStyle(fontSize: 70), //앱 로고 크기
+                theme.flowerEmoji, //꽃 이모지
+                style: const TextStyle(fontSize: 70), //앱 로고 크기
               ),
               const SizedBox(height: 20), //로고와 입력창 사이 간격
-              const Text //로그인 제목
+              Text //로그인 제목
               (
                 'HANAS 로그인',
                 style: TextStyle //텍스트 스타일
                 (
                   fontSize: 28, //폰트 크기
                   fontWeight: FontWeight.bold, //굵게
-                  color: Colors.pinkAccent, //핑크색 글자
+                  color: theme.foreground, //텍스트 색상
                 ),
               ),
               const SizedBox(height: 40), //제목과 입력창 사이 간격
@@ -82,17 +88,17 @@ class _LoginScreenState extends State<LoginScreen>
                 (
                   labelText: '닉네임', //레이블 텍스트
                   filled: true, //채워진 스타일
-                  fillColor: Colors.white, //배경 흰색
-                  labelStyle: const TextStyle(color: Colors.pinkAccent), //레이블 핑크색
+                  fillColor: theme.cardColor, //카드 배경색
+                  labelStyle: TextStyle(color: theme.foreground), //레이블 색상
                   enabledBorder: OutlineInputBorder //기본 테두리
                   (
                     borderRadius: BorderRadius.circular(12), //둥근 모서리
-                    borderSide: const BorderSide(color: Colors.pinkAccent), //핑크색 테두리
+                    borderSide: BorderSide(color: theme.borderColor), //테두리 색상
                   ),
                   focusedBorder: OutlineInputBorder //포커스된 테두리
                   (
                     borderRadius: BorderRadius.circular(12), //둥근 모서리
-                    borderSide: const BorderSide(color: Colors.pinkAccent, width: 2), //두꺼운 핑크색 테두리
+                    borderSide: BorderSide(color: theme.accent, width: 2), //강조 색상 테두리
                   ),
                 ),
               ),
@@ -108,17 +114,18 @@ class _LoginScreenState extends State<LoginScreen>
                   onPressed: _login, //로그인 처리 메서드 연결
                   style: ElevatedButton.styleFrom //버튼 스타일
                   (
-                    backgroundColor: Colors.pinkAccent, //핑크색 배경
+                    backgroundColor: theme.primary, //핑크색 배경
                     padding: const EdgeInsets.symmetric(vertical: 14), //세로 패딩
+                    shadowColor: theme.shadowColor, //그림자 색상
                     shape: RoundedRectangleBorder //둥근 모서리
                     (
                       borderRadius: BorderRadius.circular(12), //모서리 반경 12
                     ),
                   ),
-                  child: const Text //버튼 텍스트
+                  child: Text //버튼 텍스트
                   (
                     '입장하기', //버튼 텍스트
-                    style: TextStyle(fontSize: 18, color: Colors.white), //폰트 크기 및 색상
+                    style: TextStyle(fontSize: 18, color: theme.bubbleOther), //폰트 크기 및 색상
                   ),
                 ),
               ),
