@@ -1,140 +1,138 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:hanas/widgets/hanas_header.dart';
-import 'package:hanas/providers/theme_provider.dart';
-import 'package:hanas/providers/favorite_provider.dart';
-import 'package:hanas/providers/friend_nickname_provider.dart';
+import 'package:flutter/material.dart'; // Flutter 기본 위젯 패키지
+import 'package:provider/provider.dart'; // 프로바이더 패키지
+import 'package:hanas/widgets/hanas_header.dart'; // 하나스 헤더 위젯
+import 'package:hanas/providers/theme_provider.dart'; // 테마 프로바이더
+import 'package:hanas/providers/favorite_provider.dart'; // 즐겨찾기 프로바이더
+import 'package:hanas/providers/friend_nickname_provider.dart'; // 친구 별명 프로바이더
 
-class FriendDetailScreen extends StatelessWidget
+class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
 {
-  final String name;
-  final String emoji;
+  final String name; // 친구 이름
+  final String emoji; // 친구 이모지
 
-  const FriendDetailScreen
+  const FriendDetailScreen // 생성자
   ({
-    super.key,
-    required this.name,
-    required this.emoji,
+    super.key, // 키
+    required this.name, // 이름 필수
+    required this.emoji, // 이모지 필수
   });
 
   @override
-  Widget build(BuildContext context)
+  Widget build(BuildContext context) // 빌드 메서드
   {
-    final theme = Provider.of<ThemeProvider>(context).currentTheme;
-    final favoriteProvider = Provider.of<FavoriteProvider>(context);
-    final nicknameProvider = Provider.of<FriendNicknameProvider>(context);
+    final theme = Provider.of<ThemeProvider>(context).currentTheme; // 현재 테마 가져오기
+    final favoriteProvider = Provider.of<FavoriteProvider>(context); // 즐겨찾기 프로바이더 가져오기
+    final nicknameProvider = Provider.of<FriendNicknameProvider>(context); // 친구 별명 프로바이더 가져오기
     final displayName = nicknameProvider.displayName(name); // 표시용 이름 가져오기
     final currentNickname = nicknameProvider.getNickname(name); // 현재 별명 가져오기(있으면)
-    final isFav = favoriteProvider.isFavorite(name);
+    final isFav = favoriteProvider.isFavorite(name); // 즐겨찾기 여부 확인
 
-    return Scaffold
+    return Scaffold // 스캐폴드 위젯
     (
-      backgroundColor: theme.background,
-      body: Column
+      backgroundColor: theme.background, // 배경색 설정
+      body: Column // 세로로 정렬
       (
-        children:
+        children: // 자식 위젯들
         [
-          HanasHeader
+          HanasHeader // 하나스 헤더
           (
-            title: Row
+            title: Row // 제목을 아이콘과 텍스트로 구성
             (
-              mainAxisAlignment: MainAxisAlignment.center,
-              children:
+              mainAxisAlignment: MainAxisAlignment.center, // 중앙 정렬
+              children: // 자식 위젯들
               [
-                Icon
+                Text // 텍스트 위젯
                 (
-                  Icons.person_outline,
-                  color: theme.accent,
-                  size: 22,
-                ),
-                const SizedBox(width: 8),
-                Text
-                (
-                  "친구 정보",
-                  style: TextStyle
+                  "친구 정보", // 제목 텍스트
+                  style: TextStyle // 텍스트 스타일
                   (
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: theme.foreground,
+                    fontSize: 20, // 폰트 크기
+                    fontWeight: FontWeight.bold, // 폰트 두께
+                    color: theme.foreground, // 폰트 색상
                   ),
                 ),
               ],
             ),
-            onBack: () => Navigator.pop(context),
+            onBack: () => Navigator.pop(context), // 뒤로가기 동작
           ),
 
-          const SizedBox(height: 30),
+          const SizedBox(height: 30), // 간격
 
           //친구 프로필 이미지
           Text
           (
-            emoji,
-            style: const TextStyle(fontSize: 100),
+            emoji, // 친구 이모지
+            style: const TextStyle(fontSize: 100), // 폰트 크기
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 20), // 간격
 
           //친구 닉네임
           Text
           (
-            displayName,
-            style: TextStyle
+            displayName, // 표시용 이름
+            style: TextStyle // 텍스트 스타일
             (
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: theme.foreground,
+              fontSize: 28, // 폰트 크기
+              fontWeight: FontWeight.bold, // 폰트 두께
+              color: theme.foreground, // 폰트 색상
             ),
           ),
           //별명 있으면 별명 표시
-          if (currentNickname != null)
-            const SizedBox(height: 4),
+          if (currentNickname != null) // 조건부 렌더링
+            const SizedBox(height: 4), // 간격
             //원래 이름
             Text
             (
-              "친구가 저장한 이름: $name",
-              style: TextStyle
+              "친구가 저장한 이름: $name", // 원래 이름 텍스트
+              style: TextStyle // 텍스트 스타일
               (
-                fontSize: 12,
-                color: theme.foreground.withOpacity(0.5),
+                fontSize: 12, // 폰트 크기
+                color: theme.foreground.withOpacity(0.5), // 폰트 색상 (반투명)
               ),
             ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 10), // 간격
 
           //상태 메시지
-          Text
+          Text // 상태 메시지 위젯
           (
-            "Love you❤",
-            style: TextStyle
+            "Love you❤", // 상태 메시지
+            style: TextStyle // 텍스트 스타일
             (
-              fontSize: 14,
-              color: theme.foreground.withOpacity(0.6),
+              fontSize: 14, // 폰트 크기
+              color: theme.foreground.withOpacity(0.6), // 폰트 색상 (반투명)
             ),
           ),
 
-          const SizedBox(height: 40),
+          const SizedBox(height: 40), // 간격
           //즐겨찾기 토글 버튼
-          Container
+          Container // 컨테이너 위젯
           (
-            width: double.infinity,
-            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isFav ? theme.primary : theme.cardColor,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: theme.primary),
+            width: double.infinity, // 가로 최대 크기
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16), // 여백 설정
+            child: ElevatedButton // 상승 버튼
+            (
+              style: ElevatedButton.styleFrom // 버튼 스타일
+              (
+                backgroundColor: isFav ? theme.primary : theme.cardColor, // 배경색 설정
+                padding: const EdgeInsets.symmetric(vertical: 14), // 패딩 설정
+                shape: RoundedRectangleBorder // 모서리 모양 설정
+                (
+                  borderRadius: BorderRadius.circular(12),// 모서리 둥글게
+                  side: BorderSide(color: theme.primary), // 테두리 색상
                 ),
               ),
-              onPressed: () {
-                favoriteProvider.toggleFavorite(name);
+              onPressed: () { // 버튼 클릭 시
+                favoriteProvider.toggleFavorite(name); // 즐겨찾기 토글
               },
-              child: Text(
-                isFav ? "즐겨찾기 해제 🌙" : "즐겨찾기 추가 ⭐",
-                style: TextStyle(
-                  fontSize: 18,
-                  color: isFav ? Colors.white : theme.primary,
+              child: Text // 버튼 텍스트
+              (
+                isFav ? "즐겨찾기 해제 🌙" : "즐겨찾기 추가 ⭐", // 텍스트 설정
+                style: TextStyle // 텍스트 스타일
+                (
+                  fontSize: 18, // 폰트 크기
+                  color: isFav ? Colors.white : theme.primary, // 폰트 색상 설정
                 ),
               ),
             ),
@@ -143,64 +141,64 @@ class FriendDetailScreen extends StatelessWidget
           //별명 설정 버튼
           Container
           (
-            width: double.infinity,
-            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: OutlinedButton
+            width: double.infinity, // 가로 최대 크기
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12), // 여백 설정
+            child: OutlinedButton // 외곽선 버튼
             (
-              style: OutlinedButton.styleFrom
+              style: OutlinedButton.styleFrom // 버튼 스타일
               (
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                side: BorderSide(color: theme.primary),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                backgroundColor: theme.cardColor,
+                padding: const EdgeInsets.symmetric(vertical: 12), // 패딩 설정
+                side: BorderSide(color: theme.primary), // 테두리 색상
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), // 모서리 둥글게
+                backgroundColor: theme.cardColor, // 배경색 설정
               ),
-              onPressed: () async
+              onPressed: () async // 버튼 클릭 시
               {
-                final controller = TextEditingController(text: currentNickname ?? name);
-                final result = await showDialog<String>
+                final controller = TextEditingController(text: currentNickname ?? name); // 텍스트 컨트롤러 초기화
+                final result = await showDialog<String> // 다이얼로그 표시
                 (
-                  context: context,
-                  builder: (context)
+                  context: context, // 컨텍스트
+                  builder: (context) // 빌더 함수
                   {
-                    return AlertDialog
+                    return AlertDialog // 알림 대화상자
                     (
-                      title: const Text("별명 설정"),
-                      content: TextField
+                      title: const Text("별명 설정"), // 제목
+                      content: TextField // 텍스트 필드
                       (
-                        controller: controller,
-                        decoration: const InputDecoration
+                        controller: controller, // 컨트롤러 설정
+                        decoration: const InputDecoration // 입력 장식
                         (
-                          hintText: "이 친구를 뭐라고 부를까? 🌸",
+                          hintText: "이 친구를 뭐라고 부를까? 🌸", // 힌트 텍스트
                         ),
                       ),
-                      actions:
+                      actions: // 액션 버튼들
                       [
-                        TextButton
+                        TextButton // 텍스트 버튼
                         (
-                          onPressed: () => Navigator.pop(context), 
-                          child: const Text("취소")
+                          onPressed: () => Navigator.pop(context),  // 취소 동작
+                          child: const Text("취소") // 버튼 텍스트
                         ),
-                        TextButton
+                        TextButton // 텍스트 버튼
                         (
-                          onPressed: () => Navigator.pop(context, controller.text), 
-                          child: const Text("저장")
+                          onPressed: () => Navigator.pop(context, controller.text), // 저장 동작
+                          child: const Text("저장") // 버튼 텍스트
                         ),
                       ],
                     );
                   },
                 );
-                if (result != null)
+                if (result != null) // 결과가 있으면
                 {
-                  nicknameProvider.setNickname(name, result);
+                  nicknameProvider.setNickname(name, result); // 별명 설정
                 }
               },
-              child: Text
+              child: Text // 버튼 텍스트
               (
-                currentNickname == null ? "별명 추가하기" : "별명 수정하기",
-                style: TextStyle
+                currentNickname == null ? "별명 추가하기" : "별명 수정하기", // 텍스트 설정
+                style: TextStyle // 텍스트 스타일
                 (
-                  color: theme.primary,
-                  fontSize: 16,
+                  color: theme.primary, // 폰트 색상 설정
+                  fontSize: 16, // 폰트 크기 설정
                 ),
               ),
             ),
@@ -209,36 +207,36 @@ class FriendDetailScreen extends StatelessWidget
           //채팅하기 버튼
           Container
           (
-            width: double.infinity,
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            child: ElevatedButton
+            width: double.infinity, // 가로 최대 크기
+            margin: const EdgeInsets.symmetric(horizontal: 20), // 여백 설정
+            child: ElevatedButton // 상승 버튼
             (
-              style: ElevatedButton.styleFrom
+              style: ElevatedButton.styleFrom // 버튼 스타일
               (
-                backgroundColor: theme.primary,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder
+                backgroundColor: theme.primary, // 배경색 설정
+                padding: const EdgeInsets.symmetric(vertical: 14), // 패딩 설정
+                shape: RoundedRectangleBorder // 모서리 모양 설정
                 (
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12), // 모서리 둥글게
                 ),
               ),
-              onPressed: ()
+              onPressed: () // 버튼 클릭 시
               {
-                Navigator.pushNamed
+                Navigator.pushNamed // 채팅 화면으로 이동
                 (
-                  context,
-                  '/chat',
-                  arguments: name,
+                  context, // 컨텍스트
+                  '/chat', // 경로
+                  arguments: name, // 친구 이름 전달
                 );
               },
-              child: const Text
+              child: const Text // 버튼 텍스트
               (
-                "채팅하기",
-                style: TextStyle
+                "채팅하기", // 텍스트 설정
+                style: TextStyle // 텍스트 스타일
                 (
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  fontSize: 18, // 폰트 크기
+                  fontWeight: FontWeight.bold, // 폰트 두께
+                  color: Colors.white, // 폰트 색상
                 ),
               ),
             ),

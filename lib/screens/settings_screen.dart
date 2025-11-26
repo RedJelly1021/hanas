@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart'; //Flutter 머티리얼 패키지 임포트
-import 'package:hanas/providers/theme_provider.dart'; //테마 프로바이더 임포트
-import 'package:hanas/widgets/hanas_header.dart'; //헤더 위젯 임포트
 import 'package:provider/provider.dart'; //프로바이더 패키지 임포트
+import 'package:hanas/widgets/hanas_header.dart'; //헤더 위젯 임포트
+import 'package:hanas/providers/theme_provider.dart'; //테마 프로바이더 임포트
 
 class SettingsScreen extends StatelessWidget //설정 화면 클래스
 {
@@ -13,24 +13,22 @@ class SettingsScreen extends StatelessWidget //설정 화면 클래스
     final theme = Provider.of<ThemeProvider>(context).currentTheme; //현재 테마 가져오기
     return Scaffold //기본 화면 구조
     (
-      body: Column
+      body: Column //세로 레이아웃
       (
-        children: 
+        children: //자식 위젯들
         [
           //헤더 영역
           HanasHeader
           (
-            title: Row
+            title: Row //헤더 제목 영역
             (
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: 
+              mainAxisAlignment: MainAxisAlignment.center, //가운데 정렬
+              children: //자식 위젯들
               [
-                Icon(Icons.settings_outlined, color: theme.accent, size: 20),
-                const SizedBox(width: 8),
-                Text
+                Text //텍스트 위젯
                 (
                   "설정", //헤더 제목
-                  style: TextStyle
+                  style: TextStyle //텍스트 스타일
                   (
                     fontSize: 20, //폰트 크기
                     fontWeight: FontWeight.bold, //굵게
@@ -57,8 +55,8 @@ class SettingsScreen extends StatelessWidget //설정 화면 클래스
                   label: "프로필 보기", //레이블
                   color: theme.foreground, //테마 색상
                   trailingColor: theme.primary, //오른쪽 아이콘 색상
-                  onTap: () => 
-                    Navigator.pushNamed(context, "/profile"),
+                  onTap: () => //탭했을 때
+                    Navigator.pushNamed(context, "/profile"), //프로필 화면으로 이동
                 ),
                 
                 //section 2 : themes
@@ -170,7 +168,7 @@ class SettingsScreen extends StatelessWidget //설정 화면 클래스
       (
         color: Colors.white.withOpacity(0.95), //반투명 흰색 배경
         borderRadius: BorderRadius.circular(14), //둥근 모서리
-        border: Border.all
+        border: Border.all //테두리
         (
           color: color.withOpacity(0.2), //테두리 색상
         ),
@@ -202,8 +200,8 @@ class SettingsScreen extends StatelessWidget //설정 화면 클래스
     );
   }
 
-  void _snack(BuildContext context, String msg) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(msg)));
+  void _snack(BuildContext context, String msg) { //스낵바 표시 메서드
+    ScaffoldMessenger.of(context) 
+        .showSnackBar(SnackBar(content: Text(msg))); //스낵바 표시
   }
 }

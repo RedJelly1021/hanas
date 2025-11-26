@@ -1,10 +1,10 @@
 //Home Screen + Tap(Friends, Chats)
 import 'package:flutter/material.dart'; //플러터 머티리얼 패키지
-import 'package:hanas/providers/theme_provider.dart'; //테마 프로바이더 임포트
+import 'package:provider/provider.dart'; //프로바이더 패키지 임포트
+import 'package:hanas/widgets/hanas_header.dart'; //헤더 위젯 임포트
 import 'package:hanas/screens/friends_screen.dart'; //친구 목록 화면 임포트
 import 'package:hanas/screens/chat_list_screen.dart'; //채팅 목록 화면 임포트
-import 'package:hanas/widgets/hanas_header.dart';
-import 'package:provider/provider.dart'; //프로바이더 패키지 임포트
+import 'package:hanas/providers/theme_provider.dart'; //테마 프로바이더 임포트
 
 class HomeScreen extends StatefulWidget //홈 화면 클래스
 {
@@ -47,15 +47,15 @@ class _HomeScreenState extends State<HomeScreen> //홈 화면 상태 클래스
           //Hanas Header
           HanasHeader
           (
-            title: Row
+            title: Row //헤더 제목 영역
             (
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: 
+              mainAxisAlignment: MainAxisAlignment.center, //가운데 정렬
+              children: //자식 위젯들
               [
-                Text
+                Text //헤더 제목
                 (
                   "${theme.flowerEmoji} HANAS", //헤더 제목
-                  style: TextStyle
+                  style: TextStyle //텍스트 스타일
                   (
                     fontSize: 26, //폰트 크기
                     fontWeight: FontWeight.bold, //굵게

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart'; //Flutter 머티리얼 패키지 임포트
-import 'package:hanas/widgets/hanas_header.dart';
 import 'package:provider/provider.dart'; //프로바이더 패키지 임포트
-import '../providers/theme_provider.dart'; //테마 프로바이더 임포트
-import '../theme/hanas_theme.dart'; //HANAS 테마 임포트
+import 'package:hanas/theme/hanas_theme.dart'; //HANAS 테마 임포트
+import 'package:hanas/widgets/hanas_header.dart'; //HANAS 헤더 위젯 임포트
+import 'package:hanas/providers/theme_provider.dart'; //테마 프로바이더 임포트
 
 class ThemeSelectScreen extends StatelessWidget //테마 선택 화면 클래스
 {
@@ -16,7 +16,7 @@ class ThemeSelectScreen extends StatelessWidget //테마 선택 화면 클래스
 
     return Scaffold //기본 화면 구조
     (
-      body: Container
+      body: Container //컨테이너 위젯
       (
         decoration: BoxDecoration //박스 장식
         (
@@ -35,22 +35,20 @@ class ThemeSelectScreen extends StatelessWidget //테마 선택 화면 클래스
         (
           child: Column //세로 정렬
           (
-            children: 
+            children: //자식 위젯들
             [
               //Hanas header
               HanasHeader
               (
-                title: Row
+                title: Row //헤더 제목 행
                 (
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: 
+                  mainAxisAlignment: MainAxisAlignment.center, //가운데 정렬
+                  children: //자식 위젯들
                   [
-                    Icon(Icons.color_lens_outlined, color: current.accent, size: 20),
-                    const SizedBox(width: 8),
-                    Text
+                    Text //헤더 텍스트
                     (
                       "테마 선택", //헤더 제목
-                      style: TextStyle
+                      style: TextStyle //텍스트 스타일
                       (
                         fontSize: 20, //폰트 크기
                         fontWeight: FontWeight.bold, //굵게

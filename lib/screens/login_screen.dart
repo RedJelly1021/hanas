@@ -1,17 +1,17 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:hanas/providers/theme_provider.dart';
-import 'package:hanas/providers/user_profile_provider.dart';
+import 'package:flutter/material.dart'; //Flutter 기본 위젯
+import 'package:provider/provider.dart'; //상태 관리를 위한 Provider 패키지
+import 'package:hanas/providers/theme_provider.dart'; //테마 관련 프로바이더
+import 'package:hanas/providers/user_profile_provider.dart'; //사용자 프로필 관련 프로바이더
 
-class LoginScreen extends StatefulWidget
+class LoginScreen extends StatefulWidget //로그인 화면 위젯
 {
-  const LoginScreen({super.key});
+  const LoginScreen({super.key}); //생성자
 
   @override
   State<LoginScreen> createState() => _LoginScreenState(); //로그인 화면 상태 생성
 }
 
-class _LoginScreenState extends State<LoginScreen>
+class _LoginScreenState extends State<LoginScreen> //로그인 화면 상태 클래스
 {
   final TextEditingController _nameController = TextEditingController(); //닉네임 입력 컨트롤러
 
