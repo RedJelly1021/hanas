@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart'; //플러터 머티리얼 패키지 임포트
 import 'package:provider/provider.dart'; //프로바이더 패키지 임포트
-import 'package:hanas/screens/chat_list_screen.dart'; //채팅 목록 화면 임포트
-import 'package:hanas/screens/chat_screen.dart'; //채팅 화면 임포트
-import 'package:hanas/screens/friend_detail_screen.dart'; //친구 상세 화면 임포트
-import 'package:hanas/screens/friends_screen.dart'; //친구 목록 화면 임포트
+import 'package:hanas/screens/splash_screen.dart'; //스플래시 화면 임포트
 import 'package:hanas/screens/home_screen.dart'; //홈 화면 임포트
 import 'package:hanas/screens/login_screen.dart'; //로그인 화면 임포트
+import 'package:hanas/screens/chat_screen.dart'; //채팅 화면 임포트
+import 'package:hanas/screens/chat_list_screen.dart'; //채팅 목록 화면 임포트
+import 'package:hanas/screens/friend_detail_screen.dart'; //친구 상세 화면 임포트
+import 'package:hanas/screens/friends_screen.dart'; //친구 목록 화면 임포트
 import 'package:hanas/screens/profile_screen.dart'; //프로필 화면 임포트
-import 'package:hanas/screens/splash_screen.dart'; //스플래시 화면 임포트
 import 'package:hanas/screens/settings_screen.dart'; //설정 화면 임포트
 import 'package:hanas/screens/theme_select_screen.dart'; //테마 선택 화면 임포트
 import 'package:hanas/providers/theme_provider.dart'; //테마 프로바이더 임포트
@@ -66,11 +66,11 @@ class HanasApp extends StatelessWidget //HANAS 앱 메인 클래스
         '/theme': (context) => const ThemeSelectScreen(), //테마 선택 화면
         '/friendDetail': (context) 
         {
-          final args = ModalRoute.of(context)!.settings.arguments as Map;
-          return FriendDetailScreen
+          final args = ModalRoute.of(context)!.settings.arguments as Map; //인자 받아오기
+          return FriendDetailScreen //친구 상세 화면
           (
-            name: args['name'],
-            emoji: args['emoji'],
+            name: args['name'], //이름 인자
+            emoji: args['emoji'], //이모지 인자
           );
         },
       },
@@ -81,7 +81,7 @@ class HanasApp extends StatelessWidget //HANAS 앱 메인 클래스
 //임시 홈 화면
 class PlaceholderHome extends StatelessWidget //임시 홈 화면 클래스
 {
-  const PlaceholderHome({super.key});
+  const PlaceholderHome({super.key}); //생성자
 
   @override
   Widget build(BuildContext context) //빌드 메서드
@@ -94,9 +94,9 @@ class PlaceholderHome extends StatelessWidget //임시 홈 화면 클래스
       ),
       body: const Center //중앙 정렬
       (
-        child: Text
+        child: Text //텍스트 위젯
         (
-          'HANAS 앱에 오신 것을 환영합니다!',
+          'HANAS 앱에 오신 것을 환영합니다!', //중앙 텍스트
           style: TextStyle(fontSize: 20), //텍스트 스타일
         ),
       ),
