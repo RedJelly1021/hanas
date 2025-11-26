@@ -150,7 +150,7 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
                           color: theme.foreground.withOpacity(0.4), //힌트 텍스트 색상
                         ),
                         border: InputBorder.none, //테두리 없음
-                        isCollapsed: true, //내부 여백 최소화
+                        //isCollapsed: true, //내부 여백 최소화
                       ),
                       onSubmitted: (_) => _sendMessage(), //엔터키로 전송
                     ),
