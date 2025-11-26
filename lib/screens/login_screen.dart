@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hanas/providers/theme_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:hanas/providers/theme_provider.dart';
+import 'package:hanas/providers/user_profile_provider.dart';
 
 class LoginScreen extends StatefulWidget
 {
@@ -37,6 +38,10 @@ class _LoginScreenState extends State<LoginScreen>
       );
       return;
     }
+
+    //닉네임을 전역 프로필 상태에 반영
+    final profile = Provider.of<UserProfileProvider>(context, listen: false); //프로필 프로바이더 가져오기
+    profile.setNickname(name); //닉네임 설정
 
     //TODO: 실제 로그인 로직은 나중에 Firebase 붙일 때 넣기
     Navigator.pushReplacementNamed(context, '/friends'); //친구 목록 화면으로 이동

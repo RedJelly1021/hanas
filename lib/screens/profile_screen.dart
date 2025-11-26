@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hanas/providers/theme_provider.dart';
 import 'package:provider/provider.dart';
-import '../widgets/hanas_header.dart';
+import 'package:hanas/widgets/hanas_header.dart';
+import 'package:hanas/providers/theme_provider.dart';
+import 'package:hanas/providers/user_profile_provider.dart';
 
 class ProfileScreen extends StatelessWidget
 {
@@ -11,6 +12,7 @@ class ProfileScreen extends StatelessWidget
   Widget build(BuildContext context)
   {
     final theme = Provider.of<ThemeProvider>(context).currentTheme;
+    final profile = Provider.of<UserProfileProvider>(context);
 
     return Scaffold
     (
@@ -39,7 +41,7 @@ class ProfileScreen extends StatelessWidget
           //닉네임
           Text
           (
-            "다현", //TODO: 로그인 시 받은 닉네임으로 변경 가능
+            profile.nickname,
             style: TextStyle
             (
               fontSize: 26,
@@ -50,14 +52,70 @@ class ProfileScreen extends StatelessWidget
 
           const SizedBox(height: 8),
           //상태 메시지
-          Text
+          Row
           (
-            "상태 메시지",
-            style: TextStyle
-            (
-              fontSize: 14,
-              color: theme.foreground.withOpacity(0.6),
-            ),
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: 
+            [
+              Flexible
+              (
+                child: Text
+                (
+                  profile.statusMessage,
+                  textAlign: TextAlign.center,
+                  style: TextStyle
+                  (
+                    fontSize: 14,
+                    color: theme.foreground.withOpacity(0.6),
+                  ),
+                ),
+              ),
+              IconButton
+              (
+                icon: Icon(Icons.edit, size: 18, color: theme.primary),
+                onPressed: () async
+                {
+                  final controller = TextEditingController(text: profile.statusMessage);
+                  final newText = await showDialog<String>
+                  (
+                    context: context,
+                    builder: (context) 
+                    {
+                      return AlertDialog
+                      (
+                        title: const Text("상태 메시지 수정"),
+                        content: TextField
+                        (
+                          controller: controller,
+                          maxLines: 2,
+                          decoration: const InputDecoration
+                          (
+                            hintText: "지금 내 마음을 적어보자 🌸" ,
+                          ),
+                        ),
+                        actions:
+                        [
+                          TextButton
+                          (
+                            onPressed: () => Navigator.pop(context), 
+                            child: const Text("취소")
+                          ),
+                          TextButton
+                          (
+                            onPressed: () => Navigator.pop(context, controller.text), 
+                            child: const Text("저장")
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                  if (newText != null) 
+                  {
+                    profile.setStatusMessage(newText);
+                  }
+                },
+              ),
+            ],
           ),
 
           const SizedBox(height: 30),
