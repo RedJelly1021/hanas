@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:hanas/providers/theme_provider.dart';
+import 'package:flutter/material.dart'; //플러터 머티리얼 패키지
+import 'package:provider/provider.dart'; //프로바이더 패키지
+import 'package:hanas/providers/theme_provider.dart'; //테마 프로바이더
 
 class ChatBubble extends StatelessWidget //채팅 말풍선 위젯 클래스
 {
@@ -21,13 +21,13 @@ class ChatBubble extends StatelessWidget //채팅 말풍선 위젯 클래스
   @override
   Widget build(BuildContext context) //빌드 메서드
   {
-    final theme = Provider.of<ThemeProvider>(context).currentTheme;
+    final theme = Provider.of<ThemeProvider>(context).currentTheme; //현재 테마 가져오기
 
     final bubbleColor = isMine ? theme.bubbleMine : theme.bubbleOther; //말풍선 배경색
     final textColor = isMine ? Colors.white : theme.primary; //텍스트 색상
     final borderColor = isMine ? Colors.transparent : theme.primary.withOpacity(0.3); //테두리 색상
 
-    return TweenAnimationBuilder<double>
+    return TweenAnimationBuilder<double> //트윈 애니메이션 빌더
     (
       tween: Tween<double>(begin: 0.0, end: 1.0), //애니메이션 트윈
       duration: const Duration(milliseconds: 300), //애니메이션 지속 시간

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:hanas/providers/theme_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/material.dart'; //플러터 머티리얼 디자인 패키지
+import 'package:provider/provider.dart'; //프로바이더 패키지
+import 'package:hanas/providers/theme_provider.dart'; //테마 프로바이더
 
 class SplashScreen extends StatefulWidget //스플래시 화면 클래스
 {
