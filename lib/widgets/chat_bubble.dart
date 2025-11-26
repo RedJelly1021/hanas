@@ -30,7 +30,7 @@ class ChatBubble extends StatelessWidget //채팅 말풍선 위젯 클래스
     return TweenAnimationBuilder<double>
     (
       tween: Tween<double>(begin: 0.0, end: 1.0), //애니메이션 트윈
-      duration: const Duration(milliseconds: 220), //애니메이션 지속 시간
+      duration: const Duration(milliseconds: 300), //애니메이션 지속 시간
       curve: Curves.easeOutCubic, //애니메이션 곡선
       builder: (context, value, child) //빌더 메서드
       {
