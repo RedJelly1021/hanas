@@ -47,7 +47,24 @@ class _HomeScreenState extends State<HomeScreen> //홈 화면 상태 클래스
           //Hanas Header
           HanasHeader
           (
-            title: "${theme.flowerEmoji} HANAS", //헤더 제목
+            title: Row
+            (
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: 
+              [
+                Text
+                (
+                  "${theme.flowerEmoji} HANAS", //헤더 제목
+                  style: TextStyle
+                  (
+                    fontSize: 26, //폰트 크기
+                    fontWeight: FontWeight.bold, //굵게
+                    color: theme.foreground, //글자 색상
+                    letterSpacing: 1.2, //글자 간격
+                  ),
+                ),
+              ],
+            ),
             rightActions: //오른쪽 액션들
             [
               IconButton //설정 아이콘 버튼

@@ -36,7 +36,30 @@ class FriendDetailScreen extends StatelessWidget
         [
           HanasHeader
           (
-            title: "친구 정보",
+            title: Row
+            (
+              mainAxisAlignment: MainAxisAlignment.center,
+              children:
+              [
+                Icon
+                (
+                  Icons.person_outline,
+                  color: theme.accent,
+                  size: 22,
+                ),
+                const SizedBox(width: 8),
+                Text
+                (
+                  "친구 정보",
+                  style: TextStyle
+                  (
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.foreground,
+                  ),
+                ),
+              ],
+            ),
             onBack: () => Navigator.pop(context),
           ),
 

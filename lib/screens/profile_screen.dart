@@ -23,7 +23,25 @@ class ProfileScreen extends StatelessWidget
         [
           HanasHeader
           (
-            title: "내 프로필",
+            title: Row
+            (
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: 
+              [
+                Icon(Icons.person_outline, color: theme.accent, size: 20),
+                const SizedBox(width: 8),
+                Text
+                (
+                "내 프로필",
+                  style: TextStyle
+                  (
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.foreground,
+                  ),
+                ),
+              ],
+            ),
             onBack: () => Navigator.pop(context),
           ),
           

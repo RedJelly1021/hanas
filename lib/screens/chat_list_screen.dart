@@ -42,7 +42,25 @@ class ChatListScreen extends StatelessWidget //채팅 목록 화면 클래스
           //헤더 영역
           HanasHeader
           (
-            title: "채팅", //헤더 제목
+            title: Row
+            (
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: 
+              [
+                Icon(Icons.chat_bubble_outline, color: theme.accent, size: 20),
+                const SizedBox(width: 8),
+                Text
+                (
+                  "채팅", //헤더 제목
+                  style: TextStyle
+                  (
+                    fontSize: 22, //폰트 크기
+                    fontWeight: FontWeight.bold, //굵게
+                    color: theme.foreground, //글자 색상
+                  ),
+                ),
+              ],
+            ),
             onBack: () => Navigator.pop(context), //뒤로가기 콜백
           ),
           //채팅 목록 영역

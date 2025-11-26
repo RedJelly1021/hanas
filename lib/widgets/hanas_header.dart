@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 class HanasHeader extends StatelessWidget 
 {
-  final String title; //헤더 제목
+  final Widget title; //헤더 제목
   final VoidCallback? onBack; //뒤로가기 콜백(선택적, null이면 뒤로가기 없음)
   final List<Widget> rightActions; //오른쪽 액션 위젯들
 
@@ -57,24 +57,18 @@ class HanasHeader extends StatelessWidget
               : SizedBox(width: leftSpaceWidth), //빈 공간
             
             //제목
-            Expanded
-            (
-              child: Center
-              (
-                child: Text
-                (
-                  title,
-                  style: TextStyle
-                  (
-                    fontSize: 22, 
-                    fontWeight: FontWeight.bold, 
-                    color: theme.foreground, 
-                    letterSpacing: 0.8,
-                  ),
-                ),
-              ),
-            ),
-
+            Expanded(child: Center(child: title)),
+            // (
+            //   title,
+            //   style: TextStyle
+            //   (
+            //     fontSize: 22, 
+            //     fontWeight: FontWeight.bold, 
+            //     color: theme.foreground, 
+            //     letterSpacing: 0.8,
+            //   ),
+            // ),
+            
             //오른쪽 액션들 여러개 가능 or 빈 공간
             Row
             (

@@ -40,7 +40,25 @@ class ThemeSelectScreen extends StatelessWidget //테마 선택 화면 클래스
               //Hanas header
               HanasHeader
               (
-                title: "테마 선택", //헤더 제목
+                title: Row
+                (
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: 
+                  [
+                    Icon(Icons.color_lens_outlined, color: current.accent, size: 20),
+                    const SizedBox(width: 8),
+                    Text
+                    (
+                      "테마 선택", //헤더 제목
+                      style: TextStyle
+                      (
+                        fontSize: 20, //폰트 크기
+                        fontWeight: FontWeight.bold, //굵게
+                        color: current.foreground, //글자 색상
+                      ),
+                    ),
+                  ],
+                ),
                 onBack: () => Navigator.pop(context), //뒤로 가기 동작
               ),
               const SizedBox(height: 10), //상단 여백'

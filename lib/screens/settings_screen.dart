@@ -20,7 +20,25 @@ class SettingsScreen extends StatelessWidget //설정 화면 클래스
           //헤더 영역
           HanasHeader
           (
-            title: "설정", //헤더 제목
+            title: Row
+            (
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: 
+              [
+                Icon(Icons.settings_outlined, color: theme.accent, size: 20),
+                const SizedBox(width: 8),
+                Text
+                (
+                  "설정", //헤더 제목
+                  style: TextStyle
+                  (
+                    fontSize: 20, //폰트 크기
+                    fontWeight: FontWeight.bold, //굵게
+                    color: theme.foreground, //글자 색상
+                  ),
+                ),
+              ],
+            ),
             onBack: () => Navigator.pop(context), //뒤로가기 콜백
           ),
           //설정 항목 영역
