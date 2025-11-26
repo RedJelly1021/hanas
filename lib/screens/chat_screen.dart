@@ -84,7 +84,7 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
           //메시지 입력 영역
           Container //메시지 입력 컨테이너
           (
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), //내부 여백
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 18), //내부 여백
             decoration: BoxDecoration //박스 장식
             (
               color: theme.cardColor, //카드 배경색
@@ -106,27 +106,81 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
             (
               children: //자식 위젯들
               [
+                // + 버튼 (파일/사진 등은 나중에)
+                IconButton
+                (
+                  icon: Icon
+                  (
+                    Icons.add_circle_outline, 
+                    color: theme.primary,
+                  ),
+                  onPressed: () 
+                  {
+                    ScaffoldMessenger.of(context).showSnackBar //스낵바 표시
+                    (
+                      const SnackBar(content: Text("사진/파일 보내기는 나중에!")), //스낵바 내용
+                    );
+                  },
+                ),
+
                 Expanded //확장 위젯
                 (
-                  child: TextField //텍스트 필드
+                  child: Container
                   (
-                    controller: _controller, //텍스트 컨트롤러
-                    style: TextStyle(color: theme.foreground), //텍스트 스타일
-                    decoration: InputDecoration //입력 장식
+                    padding: const EdgeInsets.symmetric(horizontal: 12), //내부 여백
+                    decoration: BoxDecoration //박스 장식
                     (
-                      hintText: "메시지 입력...", //힌트 텍스트
-                      hintStyle: TextStyle //힌트 텍스트 스타일
+                      color: theme.background, //배경색
+                      borderRadius: BorderRadius.circular(20), //둥근 테두리
+                      border: Border.all
                       (
-                        color: theme.foreground.withOpacity(0.4), //힌트 텍스트 색상
+                        color: theme.borderColor.withOpacity(0.7), //테두리 색상
+                        width: 1, //테두리 두께
                       ),
-                      border: InputBorder.none, //테두리 없음
                     ),
-                    onSubmitted: (_) => _sendMessage(), //엔터키로 전송
+                    child: TextField //텍스트 필드
+                    (
+                      controller: _controller, //텍스트 컨트롤러
+                      style: TextStyle(color: theme.foreground), //텍스트 스타일
+                      decoration: InputDecoration //입력 장식
+                      (
+                        hintText: "메시지 입력...", //힌트 텍스트
+                        hintStyle: TextStyle //힌트 텍스트 스타일
+                        (
+                          color: theme.foreground.withOpacity(0.4), //힌트 텍스트 색상
+                        ),
+                        border: InputBorder.none, //테두리 없음
+                        isCollapsed: true, //내부 여백 최소화
+                      ),
+                      onSubmitted: (_) => _sendMessage(), //엔터키로 전송
+                    ),
                   ),
                 ),
+                //이모지 버튼
+                IconButton //이모지 버튼
+                (
+                  icon: Icon
+                  (
+                    Icons.emoji_emotions_outlined, 
+                    color: theme.primary,
+                  ),
+                  onPressed: () 
+                  {
+                    ScaffoldMessenger.of(context).showSnackBar //스낵바 표시
+                    (
+                      const SnackBar(content: Text("이모지 피커는 나중에!")), //스낵바 내용
+                    );
+                  },
+                ),
+
+                //전송 버튼
                 IconButton //전송 버튼
                 (
-                  icon: Icon(Icons.send, color: theme.primary), //핑크색 전송 아이콘
+                  icon: Icon
+                  (
+                    Icons.send,
+                    color: theme.primary
+                  ), //핑크색 전송 아이콘
                   onPressed: _sendMessage, //전송 버튼 클릭
                 )
               ],
