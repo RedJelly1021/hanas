@@ -1,17 +1,19 @@
-import 'package:flutter/material.dart';
-import 'package:hanas/providers/favorite_provider.dart';
+import 'package:flutter/material.dart'; //플러터 머티리얼 패키지 임포트
+import 'package:provider/provider.dart'; //프로바이더 패키지 임포트
 import 'package:hanas/screens/chat_list_screen.dart'; //채팅 목록 화면 임포트
 import 'package:hanas/screens/chat_screen.dart'; //채팅 화면 임포트
-import 'package:hanas/screens/friend_detail_screen.dart';
+import 'package:hanas/screens/friend_detail_screen.dart'; //친구 상세 화면 임포트
 import 'package:hanas/screens/friends_screen.dart'; //친구 목록 화면 임포트
 import 'package:hanas/screens/home_screen.dart'; //홈 화면 임포트
 import 'package:hanas/screens/login_screen.dart'; //로그인 화면 임포트
-import 'package:hanas/screens/profile_screen.dart';
+import 'package:hanas/screens/profile_screen.dart'; //프로필 화면 임포트
 import 'package:hanas/screens/splash_screen.dart'; //스플래시 화면 임포트
 import 'package:hanas/screens/settings_screen.dart'; //설정 화면 임포트
-import 'package:hanas/providers/theme_provider.dart'; //테마 프로바이더 임포트
 import 'package:hanas/screens/theme_select_screen.dart'; //테마 선택 화면 임포트
-import 'package:provider/provider.dart'; //프로바이더 패키지 임포트
+import 'package:hanas/providers/theme_provider.dart'; //테마 프로바이더 임포트
+import 'package:hanas/providers/favorite_provider.dart'; //즐겨찾기 프로바이더 임포트
+import 'package:hanas/providers/friend_nickname_provider.dart'; //친구 닉네임 프로바이더 임포트
+import 'package:hanas/providers/user_profile_provider.dart'; //유저 프로필 프로바이더 임포트
 
 void main()
 {
@@ -23,8 +25,10 @@ void main()
     MultiProvider //ChangeNotifierProvider로 감싸기
     (
       providers: [
-        ChangeNotifierProvider(create: (_) => FavoriteProvider()), //즐겨찾기 프로바이더 생성
         ChangeNotifierProvider(create: (_) => ThemeProvider()), //테마 프로바이더 생성
+        ChangeNotifierProvider(create: (_) => FavoriteProvider()), //즐겨찾기 프로바이더 생성
+        ChangeNotifierProvider(create: (_) => UserProfileProvider()), //유저 프로필 프로바이더 생성
+        ChangeNotifierProvider(create: (_) => FriendNicknameProvider()), //친구 닉네임 프로바이더 생성
       ],
       child: const HanasApp(), //HANAS 앱
     ),
