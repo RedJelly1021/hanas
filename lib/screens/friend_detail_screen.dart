@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hanas/providers/favorite_provider.dart';
-import 'package:hanas/providers/theme_provider.dart';
 import 'package:provider/provider.dart';
-import '../widgets/hanas_header.dart';
+import 'package:hanas/widgets/hanas_header.dart';
+import 'package:hanas/providers/theme_provider.dart';
+import 'package:hanas/providers/favorite_provider.dart';
+import 'package:hanas/providers/friend_nickname_provider.dart';
 
 class FriendDetailScreen extends StatelessWidget
 {
@@ -21,6 +22,9 @@ class FriendDetailScreen extends StatelessWidget
   {
     final theme = Provider.of<ThemeProvider>(context).currentTheme;
     final favoriteProvider = Provider.of<FavoriteProvider>(context);
+    final nicknameProvider = Provider.of<FriendNicknameProvider>(context);
+    final displayName = nicknameProvider.displayName(name); // 표시용 이름 가져오기
+    final currentNickname = nicknameProvider.getNickname(name); // 현재 별명 가져오기(있으면)
     final isFav = favoriteProvider.isFavorite(name);
 
     return Scaffold
@@ -50,7 +54,7 @@ class FriendDetailScreen extends StatelessWidget
           //친구 닉네임
           Text
           (
-            name,
+            displayName,
             style: TextStyle
             (
               fontSize: 28,
@@ -58,6 +62,19 @@ class FriendDetailScreen extends StatelessWidget
               color: theme.foreground,
             ),
           ),
+          //별명 있으면 별명 표시
+          if (currentNickname != null)
+            const SizedBox(height: 4),
+            //원래 이름
+            Text
+            (
+              "친구가 저장한 이름: $name",
+              style: TextStyle
+              (
+                fontSize: 12,
+                color: theme.foreground.withOpacity(0.5),
+              ),
+            ),
 
           const SizedBox(height: 10),
 
@@ -100,6 +117,71 @@ class FriendDetailScreen extends StatelessWidget
             ),
           ),
 
+          //별명 설정 버튼
+          Container
+          (
+            width: double.infinity,
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: OutlinedButton
+            (
+              style: OutlinedButton.styleFrom
+              (
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                side: BorderSide(color: theme.primary),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                backgroundColor: theme.cardColor,
+              ),
+              onPressed: () async
+              {
+                final controller = TextEditingController(text: currentNickname ?? name);
+                final result = await showDialog<String>
+                (
+                  context: context,
+                  builder: (context)
+                  {
+                    return AlertDialog
+                    (
+                      title: const Text("별명 설정"),
+                      content: TextField
+                      (
+                        controller: controller,
+                        decoration: const InputDecoration
+                        (
+                          hintText: "이 친구를 뭐라고 부를까? 🌸",
+                        ),
+                      ),
+                      actions:
+                      [
+                        TextButton
+                        (
+                          onPressed: () => Navigator.pop(context), 
+                          child: const Text("취소")
+                        ),
+                        TextButton
+                        (
+                          onPressed: () => Navigator.pop(context, controller.text), 
+                          child: const Text("저장")
+                        ),
+                      ],
+                    );
+                  },
+                );
+                if (result != null)
+                {
+                  nicknameProvider.setNickname(name, result);
+                }
+              },
+              child: Text
+              (
+                currentNickname == null ? "별명 추가하기" : "별명 수정하기",
+                style: TextStyle
+                (
+                  color: theme.primary,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
 
           //채팅하기 버튼
           Container

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hanas/providers/theme_provider.dart';
-import 'package:hanas/widgets/hanas_header.dart';
 import 'package:provider/provider.dart';
-import '../widgets/chat_bubble.dart';
+import 'package:hanas/widgets/chat_bubble.dart';
+import 'package:hanas/widgets/hanas_header.dart';
+import 'package:hanas/providers/theme_provider.dart';
+import 'package:hanas/providers/friend_nickname_provider.dart';
 
 class ChatScreen extends StatefulWidget //채팅 화면 클래스
 {
@@ -42,6 +43,8 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
     final theme = Provider.of<ThemeProvider>(context).currentTheme; //현재 테마 가져오기
     final friendName = 
         (ModalRoute.of(context)?.settings.arguments ?? "알 수 없음") as String; //친구 이름 가져오기
+    final nicknameProvider = Provider.of<FriendNicknameProvider>(context);
+    final displayName = nicknameProvider.displayName(friendName); // 표시용 이름 가져오기
 
     return Scaffold //기본 화면 구조
     (
@@ -53,7 +56,8 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
           //헤더 영역
           HanasHeader //헤더 위젯
           (
-            title: friendName, //헤더 제목
+            //title: friendName, //헤더 제목
+            title: displayName, //별명 있으면 별명, 없으면 원래 이름
             onBack: () => Navigator.pop(context), //뒤로가기 콜백
           ),
           //메시지 표시 영역

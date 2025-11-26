@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:hanas/providers/favorite_provider.dart';
-import 'package:hanas/providers/theme_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:hanas/widgets/hanas_card.dart';
 import 'package:hanas/widgets/hanas_header.dart';
-import 'package:provider/provider.dart';
+import 'package:hanas/providers/theme_provider.dart';
+import 'package:hanas/providers/favorite_provider.dart';
+import 'package:hanas/providers/friend_nickname_provider.dart';
 
 class Friend //친구 모델 클래스
 {
@@ -20,17 +21,34 @@ final mockFriends = //모의 친구 데이터
   Friend("유리", "🌼"),
 ];
 
-class FriendsScreen extends StatelessWidget //친구 목록 화면 클래스
+class FriendsScreen extends StatefulWidget //친구 목록 화면 클래스
 {
   const FriendsScreen({super.key});
+
+  @override
+  State<FriendsScreen> createState() => _FriendsScreenState();
+}
+
+class _FriendsScreenState extends State<FriendsScreen> 
+{
+  String _searchQuery = ""; //검색 쿼리 상태 변수
 
   @override
   Widget build(BuildContext context) //빌드 메서드
   {
     final theme = Provider.of<ThemeProvider>(context).currentTheme; //현재 테마 가져오기
     final favoriteProvider = Provider.of<FavoriteProvider>(context);
+    final nicknameProvider = Provider.of<FriendNicknameProvider>(context);
 
-    final sortedFriends = [...mockFriends];
+    // 검색 + 즐겨찾기 정렬 있으면 같이 처리
+    final filtered = mockFriends.where((friend) 
+    {
+      final display = nicknameProvider.displayName(friend.name);
+      if(_searchQuery.isEmpty) return true;
+      return display.contains(_searchQuery) || friend.name.contains(_searchQuery);
+    }).toList();
+
+    final sortedFriends = [...filtered];
     sortedFriends.sort((a, b) {
       final aFav = favoriteProvider.isFavorite(a.name);
       final bFav = favoriteProvider.isFavorite(b.name);
@@ -79,6 +97,38 @@ class FriendsScreen extends StatelessWidget //친구 목록 화면 클래스
               ),
             ],
           ),
+          
+          //검색창
+          Padding
+          (
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4), //패딩 설정
+            child: TextField //텍스트 필드 위젯
+            (
+              decoration: InputDecoration //입력 장식
+              (
+                hintText: "친구 검색...", //힌트 텍스트
+                prefixIcon: Icon(Icons.search), //검색 아이콘
+                filled: true, //채워진 스타일
+                fillColor: theme.cardColor, //채우기 색상
+                contentPadding: const EdgeInsets.symmetric(vertical: 8), //내용 패딩
+                border: OutlineInputBorder //외곽선 테두리
+                (
+                  borderRadius: BorderRadius.circular(24), //둥근 테두리
+                  borderSide: BorderSide(color: theme.borderColor.withOpacity(0.6)),//테두리 색상
+                ),
+                focusedBorder: OutlineInputBorder //포커스된 외곽선 테두리
+                (
+                  borderRadius: BorderRadius.circular(24), //둥근 테두리
+                  borderSide: BorderSide(color: theme.primary, width: 1.5), //포커스된 테두리 색상
+                ),
+              ),
+              onChanged: (value) //텍스트 변경 시
+              {
+                setState(() => _searchQuery = value.trim()); //검색 쿼리 상태 업데이트
+              },
+            ),
+          ),
+
           //친구 목록 영역
           Expanded
           (
@@ -105,6 +155,7 @@ class FriendsScreen extends StatelessWidget //친구 목록 화면 클래스
                       {
                         'name': friend.name, //친구 이름 전달
                         'emoji': friend.emoji, //친구 이모지 전달
+                        //'displayName': nicknameProvider.displayName(friend.name), // 표시용 이름 전달
                       },
                     ); //채팅 화면으로 이동
                   },
@@ -117,7 +168,8 @@ class FriendsScreen extends StatelessWidget //친구 목록 화면 클래스
                     ),
                     title: Text //친구 이름
                     (
-                      friend.name, //이름 텍스트
+                      //friend.name, //이름 텍스트
+                      nicknameProvider.displayName(friend.name), //별명 있으면 별명, 없으면 원래 이름
                       style: TextStyle //텍스트 스타일
                       (
                         fontSize: 18, //글자 크기

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hanas/providers/theme_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:hanas/widgets/hanas_card.dart';
 import 'package:hanas/widgets/hanas_header.dart';
-import 'package:provider/provider.dart';
+import 'package:hanas/providers/theme_provider.dart';
+import 'package:hanas/providers/friend_nickname_provider.dart';
 
 class ChatPreview //채팅 미리보기 모델 클래스
 {
@@ -29,7 +30,8 @@ class ChatListScreen extends StatelessWidget //채팅 목록 화면 클래스
   Widget build(BuildContext context) //빌드 메서드
   {
     final theme = Provider.of<ThemeProvider>(context).currentTheme; //현재 테마 가져오기
-    
+    final nicknameProvider = Provider.of<FriendNicknameProvider>(context);
+
     return Scaffold //기본 화면 구조
     (
       backgroundColor: theme.background, //연한 핑크색 배경
@@ -95,7 +97,8 @@ class ChatListScreen extends StatelessWidget //채팅 목록 화면 클래스
                           [
                             Text //친구 이름
                             (
-                              chat.friendName, //친구 이름
+                              //chat.friendName, //친구 이름
+                              nicknameProvider.displayName(chat.friendName), //별명 있으면 별명, 없으면 원래 이름
                               style: TextStyle //텍스트 스타일
                               (
                                 fontSize: 18, //폰트 크기
