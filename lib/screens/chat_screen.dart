@@ -142,8 +142,10 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
   Widget build(BuildContext context) //빌드 메서드
   {
     final theme = Provider.of<ThemeProvider>(context).currentTheme; //현재 테마 가져오기
-    final friendName = 
-        (ModalRoute.of(context)?.settings.arguments ?? "알 수 없음") as String; //친구 이름 가져오기
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+    final friendName = args['name'] as String; //친구 이름 가져오기
+    final friendEmoji = args['emoji'] as String; //친구 이모지 가져오기
+
     final nicknameProvider = Provider.of<FriendNicknameProvider>(context);
     final displayName = nicknameProvider.displayName(friendName); // 표시용 이름 가져오기
 
@@ -170,7 +172,7 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
                   arguments: 
                   {
                     'name': friendName, //친구 이름 전달
-                    'emoji': displayName.characters.first, //임시 이모지 전달
+                    'emoji': friendEmoji, //친구 이모지 전달
                   },
                 );
               },

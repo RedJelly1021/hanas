@@ -230,7 +230,11 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
                 (
                   context, // 컨텍스트
                   '/chat', // 경로
-                  arguments: name, // 친구 이름 전달
+                  arguments: 
+                  {
+                    'name': name, // 친구 이름 전달
+                    'emoji': emoji, // 친구 이모지 전달
+                  },
                 );
               },
               child: const Text // 버튼 텍스트

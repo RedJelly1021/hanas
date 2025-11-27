@@ -52,16 +52,8 @@ class _FriendsScreenState extends State<FriendsScreen> //친구 목록 화면 �
     final nicknameProvider = Provider.of<FriendNicknameProvider>(context); //친구 별명 제공자 가져오기
     final friendRequestProvider = Provider.of<FriendRequestProvider>(context); //친구 요청 제공자 가져오기
 
-    //1) Provider에서 친구 이름 목록 가져오기
-    final friendNames = friendRequestProvider.friends; //내 친구 이름 목록 가져오기
-    final friends = friendNames.map((name) //친구 이름으로 친구 모델 생성
-    {
-      return FriendData
-      (
-        name: name, //친구 이름
-        emoji: emojiMap[name] ?? "🙂", //이모지 (없으면 기본값)
-      );
-    }).toList();
+    //1) Provider에서 친구 목록 가져오기
+    final friends = friendRequestProvider.friends; //내 친구 목록 가져오기
 
     //2) 검색 + 즐겨찾기 정렬 있으면 같이 처리
     final filtered = friends.where((friend) //검색 필터링
