@@ -90,23 +90,17 @@ class FriendRequestProvider extends ChangeNotifier //ChangeNotifier 상속
   List<FriendRequest> get outgoingRequests => List.unmodifiable(_outgoingRequests); //발신 요청 목록
 
   //이름으로 내가 이미 친구인지 확인
-  bool isMyFriend(String name) 
-  {
-    return _friends.contains(name); //친구 목록에 이름이 있는지 확인
-  }
+  bool isMyFriend(String name) => 
+      _friends.contains(name); //친구 목록에 이름이 있는지 확인
 
   //이름 기준으로 나에게 온 요청이 있는지
-  bool hasIncomingRequest(String name)
-  {
-    return _incomingRequests.any((request) => request.name == name); //수신 요청 목록에 이름이 있는지 확인
-  }
+  bool hasIncomingRequest(String name) =>
+      _incomingRequests.any((request) => request.name == name); //수신 요청 목록에 이름이 있는지 확인
 
   //이름 기준으로 내가 보낸 요청이 있는지
-  bool hasOutgoingRequest(String name)
-  {
-    return _outgoingRequests.any((request) => request.name == name); //발신 요청 목록에 이름이 있는지 확인
-  }
-
+  bool hasOutgoingRequest(String name) =>
+      _outgoingRequests.any((request) => request.name == name); //발신 요청 목록에 이름이 있는지 확인
+  
   //친구 검색 (더미 데이터에서 이름/이모지 포함 여부로 필터)
   List<HanasUserStub> searchUsers(String query, {String? myName}) //친구 검색 메서드
   {
@@ -139,10 +133,7 @@ class FriendRequestProvider extends ChangeNotifier //ChangeNotifier 상속
 
     if (existingIncoming.isNotEmpty) //기존 수신 요청이 있으면
     {
-      for (final req in existingIncoming) //모든 기존 요청에 대해
-      {
-        _incomingRequests.remove(req); //기존 요청 제거
-      }
+      _incomingRequests.removeWhere((req) => req.name == user.name); //기존 수신 요청 제거
 
       if (!_friends.contains(user.name)) //아직 친구가 아니면
       {
@@ -182,10 +173,17 @@ class FriendRequestProvider extends ChangeNotifier //ChangeNotifier 상속
     notifyListeners(); //상태 변경 알림
   }
 
-  //친구 요청 거절 / 취소 / 삭제
+  //친구 요청 거절
   void declineRequest(String requestId) //거절 메서드
   {
     _incomingRequests.removeWhere((req) => req.id == requestId); //수신 요청에서 제거
+    notifyListeners(); //상태 변경 알림
+  }
+
+  //친구 삭제
+  void removeFriend(String name) //친구 삭제 메서드
+  {
+    _friends.remove(name); //친구 목록에서 제거
     notifyListeners(); //상태 변경 알림
   }
 }
