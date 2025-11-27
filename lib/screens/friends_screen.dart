@@ -5,21 +5,22 @@ import 'package:hanas/widgets/hanas_header.dart'; //커스텀 헤더 위젯
 import 'package:hanas/providers/theme_provider.dart'; //테마 제공자
 import 'package:hanas/providers/favorite_provider.dart'; //즐겨찾기 제공자
 import 'package:hanas/providers/friend_nickname_provider.dart'; //친구 별명 제공자
+import 'package:hanas/providers/friend_request_provider.dart'; //친구 요청 제공자
 
-class Friend //친구 모델 클래스
+// 내부용 Friend 구조체
+class FriendData 
 {
-  final String name; //친구 이름
-  final String emoji; //친구 이모지
-
-  Friend(this.name, this.emoji); //생성자
+  final String name;
+  final String emoji;
+  FriendData({required this.name, required this.emoji});
 }
 
-final mockFriends = //모의 친구 데이터
-[
-  Friend("아람찌", "😍"),
-  Friend("윤이", "👧🏻"),
-  Friend("유리", "🌼"),
-];
+// final mockFriends = //모의 친구 데이터
+// [
+//   Friend("아람찌", "😍"),
+//   Friend("윤이", "👧🏻"),
+//   Friend("유리", "🌼"),
+// ];
 
 class FriendsScreen extends StatefulWidget //친구 목록 화면 클래스
 {
@@ -33,21 +34,44 @@ class _FriendsScreenState extends State<FriendsScreen> //친구 목록 화면 �
 {
   String _searchQuery = ""; //검색 쿼리 상태 변수
 
+  // 임시 이모지 맵 (Firebase 도입 전)
+  final Map<String, String> emojiMap = {
+    "민지": "🐰",
+    "현우": "🐻",
+    "서준": "🌊",
+    "유리": "🫧",
+    "하늘": "☁️",
+    "다현": "🌸",
+  };
+
   @override
   Widget build(BuildContext context) //빌드 메서드
   {
     final theme = Provider.of<ThemeProvider>(context).currentTheme; //현재 테마 가져오기
     final favoriteProvider = Provider.of<FavoriteProvider>(context); //즐겨찾기 제공자 가져오기
     final nicknameProvider = Provider.of<FriendNicknameProvider>(context); //친구 별명 제공자 가져오기
+    final friendRequestProvider = Provider.of<FriendRequestProvider>(context); //친구 요청 제공자 가져오기
 
-    // 검색 + 즐겨찾기 정렬 있으면 같이 처리
-    final filtered = mockFriends.where((friend) //검색 필터링
+    //1) Provider에서 친구 이름 목록 가져오기
+    final friendNames = friendRequestProvider.friends; //내 친구 이름 목록 가져오기
+    final friends = friendNames.map((name) //친구 이름으로 친구 모델 생성
+    {
+      return FriendData
+      (
+        name: name, //친구 이름
+        emoji: emojiMap[name] ?? "🙂", //이모지 (없으면 기본값)
+      );
+    }).toList();
+
+    //2) 검색 + 즐겨찾기 정렬 있으면 같이 처리
+    final filtered = friends.where((friend) //검색 필터링
     {
       final display = nicknameProvider.displayName(friend.name); //표시용 이름 가져오기
       if(_searchQuery.isEmpty) return true; //검색어 없으면 모두 표시
       return display.contains(_searchQuery) || friend.name.contains(_searchQuery); //이름 또는 별명에 검색어 포함 여부
     }).toList();
 
+    //3) 즐겨찾기 우선 정렬
     final sortedFriends = [...filtered]; //필터링된 친구 목록 복사
     sortedFriends.sort((a, b) { //즐겨찾기 우선 정렬
       final aFav = favoriteProvider.isFavorite(a.name); //a가 즐겨찾기인지
