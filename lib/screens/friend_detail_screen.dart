@@ -4,6 +4,7 @@ import 'package:hanas/widgets/hanas_header.dart'; // 하나스 헤더 위젯
 import 'package:hanas/providers/theme_provider.dart'; // 테마 프로바이더
 import 'package:hanas/providers/favorite_provider.dart'; // 즐겨찾기 프로바이더
 import 'package:hanas/providers/friend_nickname_provider.dart'; // 친구 별명 프로바이더
+import 'package:hanas/providers/friend_request_provider.dart'; // 친구 요청 프로바이더
 
 class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
 {
@@ -23,6 +24,8 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
     final theme = Provider.of<ThemeProvider>(context).currentTheme; // 현재 테마 가져오기
     final favoriteProvider = Provider.of<FavoriteProvider>(context); // 즐겨찾기 프로바이더 가져오기
     final nicknameProvider = Provider.of<FriendNicknameProvider>(context); // 친구 별명 프로바이더 가져오기
+    final friendRequestProvider = Provider.of<FriendRequestProvider>(context); // 친구 요청 프로바이더 가져오기
+
     final displayName = nicknameProvider.displayName(name); // 표시용 이름 가져오기
     final currentNickname = nicknameProvider.getNickname(name); // 현재 별명 가져오기(있으면)
     final isFav = favoriteProvider.isFavorite(name); // 즐겨찾기 여부 확인
@@ -79,7 +82,7 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
             ),
           ),
           //별명 있으면 별명 표시
-          if (currentNickname != null) // 조건부 렌더링
+          if (currentNickname != null) ...[
             const SizedBox(height: 4), // 간격
             //원래 이름
             Text
@@ -91,6 +94,7 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
                 color: theme.foreground.withOpacity(0.5), // 폰트 색상 (반투명)
               ),
             ),
+          ],
 
           const SizedBox(height: 10), // 간격
 
@@ -128,7 +132,7 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
               },
               child: Text // 버튼 텍스트
               (
-                isFav ? "즐겨찾기 해제 🌙" : "즐겨찾기 추가 ⭐", // 텍스트 설정
+                isFav ? "즐겨찾기 해제" : "즐겨찾기 추가 ⭐", // 텍스트 설정
                 style: TextStyle // 텍스트 스타일
                 (
                   fontSize: 18, // 폰트 크기
@@ -240,7 +244,85 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
                 ),
               ),
             ),
-          )
+          ),
+
+          const SizedBox(height: 24), // 간격
+
+          // 친구 삭제 버튼
+          Container
+          (
+            width: double.infinity, // 가로 최대 크기
+            margin: const EdgeInsets.symmetric(horizontal: 20), // 여백 설정
+            child: OutlinedButton // 외곽선 버튼
+            (
+              style: OutlinedButton.styleFrom // 버튼 스타일
+              (
+                padding: const EdgeInsets.symmetric(vertical: 12), // 패딩 설정
+                side: const BorderSide(color: Colors.redAccent), // 테두리 색상
+                shape: RoundedRectangleBorder // 모서리 모양 설정
+                (
+                  borderRadius: BorderRadius.circular(12), // 모서리 둥글게
+                ),
+              ),
+              onPressed: ()
+              {
+                showDialog
+                (
+                  context: context, // 컨텍스트
+                  builder: (context) // 빌더 함수
+                  {
+                    return AlertDialog // 알림 대화상자
+                    (
+                      title: const Text("정말 친구를 삭제할까요?"), // 제목
+                      content: Text
+                      (
+                        "$displayName 님을 친구 목록에서 삭제합니다.",
+                      ), // 내용
+                      actions: // 액션 버튼들
+                      [
+                        TextButton // 텍스트 버튼
+                        (
+                          onPressed: () => Navigator.pop(context), // 취소 동작
+                          child: const Text("취소") // 버튼 텍스트
+                        ),
+                        TextButton // 텍스트 버튼
+                        (
+                          onPressed: () // 삭제 동작
+                          {
+                            Navigator.pop(context);
+                            friendRequestProvider.removeFriend(name); // 친구 삭제
+                            Navigator.pop(context); // 이전 화면으로 돌아가기
+
+                            ScaffoldMessenger.of(context).showSnackBar // 스낵바 표시
+                            (
+                              SnackBar // 스낵바 위젯
+                              (
+                                content: Text("$displayName 님이 친구 목록에서 삭제되었습니다."), // 스낵바 내용
+                              ),
+                            );
+                          },
+                          child: const Text
+                          (
+                            "삭제", // 버튼 텍스트
+                            style: TextStyle(color: Colors.redAccent), // 텍스트 스타일
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: const Text // 버튼 텍스트
+              (
+                "친구 삭제", // 텍스트 설정
+                style: TextStyle // 텍스트 스타일
+                (
+                  color: Colors.redAccent, // 폰트 색상 설정
+                  fontSize: 16, // 폰트 크기 설정
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
