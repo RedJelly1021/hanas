@@ -90,14 +90,8 @@ class _FriendsScreenState extends State<FriendsScreen> //친구 목록 화면 �
               IconButton //친구 추가 아이콘 버튼
               (
                 icon: Icon(Icons.person_add, color: theme.foreground), //친구 추가 아이콘
-                onPressed: () //탭했을 때
-                {
-                  //TODO : 친구 추가 기능 구현
-                  ScaffoldMessenger.of(context).showSnackBar //Snackbar 표시
-                  (
-                    const SnackBar(content: Text("친구 추가 기능은 나중에!")), //Snackbar 내용
-                  );
-                },
+                onPressed: () => //탭했을 때
+                  Navigator.pushNamed(context, '/friendAdd'), //친구 추가 화면으로 이동
               ),
               IconButton //채팅 아이콘 버튼
               (
