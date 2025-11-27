@@ -10,10 +10,12 @@ import 'package:hanas/screens/friends_screen.dart'; //친구 목록 화면 임�
 import 'package:hanas/screens/profile_screen.dart'; //프로필 화면 임포트
 import 'package:hanas/screens/settings_screen.dart'; //설정 화면 임포트
 import 'package:hanas/screens/theme_select_screen.dart'; //테마 선택 화면 임포트
+import 'package:hanas/screens/friend_add_screen.dart'; //친구 추가 화면 임포트
 import 'package:hanas/providers/theme_provider.dart'; //테마 프로바이더 임포트
 import 'package:hanas/providers/favorite_provider.dart'; //즐겨찾기 프로바이더 임포트
 import 'package:hanas/providers/friend_nickname_provider.dart'; //친구 닉네임 프로바이더 임포트
 import 'package:hanas/providers/user_profile_provider.dart'; //유저 프로필 프로바이더 임포트
+import 'package:hanas/providers/friend_request_provider.dart'; //친구 요청 프로바이더 임포트
 
 void main()
 {
@@ -28,6 +30,7 @@ void main()
         ChangeNotifierProvider(create: (_) => ThemeProvider()), //테마 프로바이더 생성
         ChangeNotifierProvider(create: (_) => FavoriteProvider()), //즐겨찾기 프로바이더 생성
         ChangeNotifierProvider(create: (_) => UserProfileProvider()), //유저 프로필 프로바이더 생성
+        ChangeNotifierProvider(create: (_) => FriendRequestProvider()), //친구 요청 프로바이더 생성
         ChangeNotifierProvider(create: (_) => FriendNicknameProvider()), //친구 닉네임 프로바이더 생성
       ],
       child: const HanasApp(), //HANAS 앱
@@ -64,6 +67,7 @@ class HanasApp extends StatelessWidget //HANAS 앱 메인 클래스
         '/settings': (context) => const SettingsScreen(), //설정 화면
         '/profile': (context) => const ProfileScreen(), //프로필 화면
         '/theme': (context) => const ThemeSelectScreen(), //테마 선택 화면
+        '/friendAdd': (context) => const FriendAddScreen(), //친구 추가 화면
         '/friendDetail': (context) 
         {
           final args = ModalRoute.of(context)!.settings.arguments as Map; //인자 받아오기
