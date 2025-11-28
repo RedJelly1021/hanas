@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart'; // Flutter 기본 위젯 패키지
 import 'package:provider/provider.dart'; // 프로바이더 패키지
 import 'package:hanas/widgets/hanas_header.dart'; // 하나스 헤더 위젯
+import 'package:hanas/models/friend.dart'; // 친구 모델
 import 'package:hanas/providers/theme_provider.dart'; // 테마 프로바이더
 import 'package:hanas/providers/favorite_provider.dart'; // 즐겨찾기 프로바이더
 import 'package:hanas/providers/friend_nickname_provider.dart'; // 친구 별명 프로바이더
-import 'package:hanas/providers/friend_request_provider.dart'; // 친구 요청 프로바이더
+import 'package:hanas/providers/friend_request_provider.dart' hide Friend; // 친구 요청 프로바이더
 
 class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
 {
-  final String name; // 친구 이름
-  final String emoji; // 친구 이모지
+  final Friend friend; // 친구 모델
 
   const FriendDetailScreen // 생성자
   ({
     super.key, // 키
-    required this.name, // 이름 필수
-    required this.emoji, // 이모지 필수
+    required this.friend, // 친구 모델 필수
   });
 
   @override
@@ -26,9 +25,9 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
     final nicknameProvider = Provider.of<FriendNicknameProvider>(context); // 친구 별명 프로바이더 가져오기
     final friendRequestProvider = Provider.of<FriendRequestProvider>(context); // 친구 요청 프로바이더 가져오기
 
-    final displayName = nicknameProvider.displayName(name); // 표시용 이름 가져오기
-    final currentNickname = nicknameProvider.getNickname(name); // 현재 별명 가져오기(있으면)
-    final isFav = favoriteProvider.isFavorite(name); // 즐겨찾기 여부 확인
+    final displayName = nicknameProvider.displayName(friend.name); // 표시용 이름 가져오기
+    final currentNickname = nicknameProvider.getNickname(friend.name); // 현재 별명 가져오기(있으면)
+    final isFav = favoriteProvider.isFavorite(friend.name); // 즐겨찾기 여부 확인
 
     return Scaffold // 스캐폴드 위젯
     (
@@ -64,7 +63,7 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
           //친구 프로필 이미지
           Text
           (
-            emoji, // 친구 이모지
+            friend.emoji, // 친구 이모지
             style: const TextStyle(fontSize: 100), // 폰트 크기
           ),
 
@@ -87,7 +86,7 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
             //원래 이름
             Text
             (
-              "친구가 저장한 이름: $name", // 원래 이름 텍스트
+              "친구가 저장한 이름: ${friend.name}", // 원래 이름 텍스트
               style: TextStyle // 텍스트 스타일
               (
                 fontSize: 12, // 폰트 크기
@@ -128,7 +127,7 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
                 ),
               ),
               onPressed: () { // 버튼 클릭 시
-                favoriteProvider.toggleFavorite(name); // 즐겨찾기 토글
+                favoriteProvider.toggleFavorite(friend.name); // 즐겨찾기 토글
               },
               child: Text // 버튼 텍스트
               (
@@ -158,7 +157,7 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
               ),
               onPressed: () async // 버튼 클릭 시
               {
-                final controller = TextEditingController(text: currentNickname ?? name); // 텍스트 컨트롤러 초기화
+                final controller = TextEditingController(text: currentNickname ?? friend.name); // 텍스트 컨트롤러 초기화
                 final result = await showDialog<String> // 다이얼로그 표시
                 (
                   context: context, // 컨텍스트
@@ -193,7 +192,7 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
                 );
                 if (result != null) // 결과가 있으면
                 {
-                  nicknameProvider.setNickname(name, result); // 별명 설정
+                  nicknameProvider.setNickname(friend.name, result); // 별명 설정
                 }
               },
               child: Text // 버튼 텍스트
@@ -232,8 +231,8 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
                   '/chat', // 경로
                   arguments: 
                   {
-                    'name': name, // 친구 이름 전달
-                    'emoji': emoji, // 친구 이모지 전달
+                    'name': friend.name, // 친구 이름 전달
+                    'emoji': friend.emoji, // 친구 이모지 전달
                   },
                 );
               },
@@ -294,7 +293,7 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
                           onPressed: () // 삭제 동작
                           {
                             Navigator.pop(context);
-                            friendRequestProvider.removeFriend(name); // 친구 삭제
+                            friendRequestProvider.removeFriend(friend.name); // 친구 삭제
                             Navigator.pop(context); // 이전 화면으로 돌아가기
 
                             ScaffoldMessenger.of(context).showSnackBar // 스낵바 표시

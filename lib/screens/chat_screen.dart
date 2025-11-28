@@ -2,16 +2,9 @@ import 'package:flutter/material.dart'; //플러터 머티리얼 패키지
 import 'package:provider/provider.dart'; //프로바이더 패키지
 import 'package:hanas/widgets/chat_bubble.dart'; //채팅 말풍선 위젯
 import 'package:hanas/widgets/hanas_header.dart'; //하나스 헤더 위젯
+import 'package:hanas/models/chat_message.dart'; //채팅 메시지 모델
 import 'package:hanas/providers/theme_provider.dart'; //테마 프로바이더
 import 'package:hanas/providers/friend_nickname_provider.dart'; //친구 별명 프로바이더
-
-class ChatMessage //채팅 메시지 클래스
-{
-  final String text; //메시지 텍스트
-  final DateTime time; //메시지 시간
-
-  ChatMessage({required this.text, required this.time}); //생성자
-}
 
 class ChatScreen extends StatefulWidget //채팅 화면 클래스
 {
@@ -47,7 +40,8 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
         ChatMessage //새 채팅 메시지
         (
           text: text, //메시지 텍스트
-          time: DateTime.now(), //현재 시간
+          time: DateTime.now(), 
+          isMine: true, //내 메시지 여부
         ),
       ); //메시지 리스트에 추가
     });
@@ -143,8 +137,8 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
   {
     final theme = Provider.of<ThemeProvider>(context).currentTheme; //현재 테마 가져오기
     final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
-    final friendName = args['name'] as String; //친구 이름 가져오기
-    final friendEmoji = args['emoji'] as String; //친구 이모지 가져오기
+    final friendName = args['name']; //친구 이름 가져오기
+    final friendEmoji = args['emoji']; //친구 이모지 가져오기
 
     final nicknameProvider = Provider.of<FriendNicknameProvider>(context);
     final displayName = nicknameProvider.displayName(friendName); // 표시용 이름 가져오기
@@ -223,7 +217,7 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
               itemBuilder: (context, index) //아이템 빌더
               {
                 final message = messages[index]; //현재 메시지
-                final isMine = index % 2 == 0; //임시로 짝수 인덱스를 내 메시지로 간주
+                final isMine = message.isMine; //내 메시지 여부
                 bool showDateHeader = false; //날짜 헤더 표시 여부
 
                 if (index == 0) //첫 메시지인지 확인
@@ -247,9 +241,9 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
                       _buildDateDivider(message.time, theme), //날짜 구분자
                     ChatBubble //채팅 말풍선
                     (
-                      message: messages[index].text, //메시지 내용
+                      message: message.text, //메시지 내용
                       isMine: isMine, //내 메시지 여부
-                      time: _formatTime(messages[index].time), //메시지 시간
+                      time: _formatTime(message.time), //메시지 시간
                     ),
                   ],
                 );

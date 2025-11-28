@@ -2,25 +2,11 @@ import 'package:flutter/material.dart'; //Flutter 기본 패키지
 import 'package:provider/provider.dart'; //상태 관리 패키지
 import 'package:hanas/widgets/hanas_card.dart'; //커스텀 카드 위젯
 import 'package:hanas/widgets/hanas_header.dart'; //커스텀 헤더 위젯
+import 'package:hanas/models/friend.dart'; //친구 모델
 import 'package:hanas/providers/theme_provider.dart'; //테마 제공자
 import 'package:hanas/providers/favorite_provider.dart'; //즐겨찾기 제공자
 import 'package:hanas/providers/friend_nickname_provider.dart'; //친구 별명 제공자
-import 'package:hanas/providers/friend_request_provider.dart'; //친구 요청 제공자
-
-// 내부용 Friend 구조체
-class FriendData 
-{
-  final String name;
-  final String emoji;
-  FriendData({required this.name, required this.emoji});
-}
-
-// final mockFriends = //모의 친구 데이터
-// [
-//   Friend("아람찌", "😍"),
-//   Friend("윤이", "👧🏻"),
-//   Friend("유리", "🌼"),
-// ];
+import 'package:hanas/providers/friend_request_provider.dart' hide Friend; //친구 요청 제공자
 
 class FriendsScreen extends StatefulWidget //친구 목록 화면 클래스
 {
@@ -35,14 +21,17 @@ class _FriendsScreenState extends State<FriendsScreen> //친구 목록 화면 �
   String _searchQuery = ""; //검색 쿼리 상태 변수
 
   // 임시 이모지 맵 (Firebase 도입 전)
-  final Map<String, String> emojiMap = {
-    "민지": "🐰",
-    "현우": "🐻",
-    "서준": "🌊",
-    "유리": "🫧",
-    "하늘": "☁️",
-    "다현": "🌸",
-  };
+  final List<Friend> mockFriends = //임시 친구 목록
+  [
+    Friend(name: "민수", emoji: "🐱"),
+    Friend(name: "지연", emoji: "🐰"),
+    Friend(name: "현우", emoji: "🦊"),
+    Friend(name: "수아", emoji: "🐼"),
+    Friend(name: "준호", emoji: "🐸"),
+    Friend(name: "예린", emoji: "🦄"),
+    Friend(name: "태민", emoji: "🐨"),
+    Friend(name: "서연", emoji: "🐥"),
+  ];
 
   @override
   Widget build(BuildContext context) //빌드 메서드

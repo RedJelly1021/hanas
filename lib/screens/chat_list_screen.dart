@@ -3,50 +3,41 @@ import 'package:provider/provider.dart'; //프로바이더 패키지
 import 'package:hanas/theme/hanas_theme.dart'; //하나스 테마 패키지
 import 'package:hanas/widgets/hanas_card.dart'; //하나스 카드 위젯 패키지
 import 'package:hanas/widgets/hanas_header.dart'; //하나스 헤더 위젯 패키지
+import 'package:hanas/models/chat_preview.dart'; //채팅 미리보기 모델 패키지
 import 'package:hanas/providers/theme_provider.dart'; //테마 프로바이더 패키지
 import 'package:hanas/providers/favorite_provider.dart'; //즐겨찾기 프로바이더 패키지
 import 'package:hanas/providers/friend_nickname_provider.dart'; //친구 별명 프로바이더 패키지
 
-class ChatPreview //채팅 미리보기 모델 클래스
-{
-  final String friendName; //친구 이름
-  final String emoji; //친구 이모지
-  final String lastMessage; //마지막 메시지
-  final String time; //마지막 메시지 시간
-
-  ChatPreview(this.friendName, this.emoji, this.lastMessage, this.time); //생성자
-}
-
-final mockChats = //모의 채팅 데이터
+final mockChats = <ChatPreview>//모의 채팅 데이터
 [
-  ChatPreview("아람찌", "😍", "내일 영화 보러 갈래?", "오후 10:30"),
-  ChatPreview("윤이", "👧🏻", "오늘 저녁 뭐 먹을래?", "오전 11:15"),
-  ChatPreview("유리", "🌼", "응응! 알겠어", "오후 12:00"),
+  ChatPreview
+  (
+    friendName: "아람찌", emoji: "😍", 
+    lastMessage: "내일 영화 보러 갈래?", time: DateTime.now().subtract(const Duration(minutes: 5))
+  ),
+  ChatPreview(
+    friendName: "윤이", emoji: "👧🏻", 
+    lastMessage: "오늘 저녁 뭐 먹을래?", time: DateTime.now().subtract(const Duration(hours: 1))
+  ),
+  ChatPreview(
+    friendName: "유리", emoji: "🌼", 
+    lastMessage: "응응! 알겠어", time: DateTime.now().subtract(const Duration(hours: 5))
+  ),
 ];
+
+String formatChatTime(DateTime time)
+{
+  final hour = time.hour;
+  final minute = time.minute.toString().padLeft(2, '0');
+  final isAm = hour < 12;
+  final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+  final period = isAm ? "오전" : "오후";
+  return "$period $displayHour:$minute";
+}
 
 class ChatListScreen extends StatelessWidget //채팅 목록 화면 클래스
 {
   const ChatListScreen({super.key}); //생성자
-
-  DateTime _parseTime(String time) //시간 문자열을 DateTime으로 변환하는 헬퍼 메서드
-  {
-    final isPm = time.contains("오후"); //오후인지 확인
-    final cleaned = time.replaceAll("오전", "").replaceAll("오후", "").trim(); //불필요한 부분 제거
-    final parts = cleaned.split(":"); //시간과 분 분리
-    int hour = int.parse(parts[0]); //시간 파싱
-    int minute = int.parse(parts[1]); //분 파싱
-
-    if (isPm && hour != 12) //오후이고 12시가 아니면
-    {
-      hour += 12; //12시간 더하기
-    }
-    else if (!isPm && hour == 12) //오전이고 12시이면
-    {
-      hour = 0; //0시로 설정
-    }
-
-    return DateTime(2024, 1, 1, hour, minute); //임의의 날짜로 DateTime 객체 생성
-  }
 
   @override
   Widget build(BuildContext context) //빌드 메서드
@@ -59,8 +50,8 @@ class ChatListScreen extends StatelessWidget //채팅 목록 화면 클래스
 
     sortedChats.sort((a, b) //채팅 목록 정렬
     {
-      final timeA = _parseTime(a.time); //시간 파싱
-      final timeB = _parseTime(b.time); //시간 파싱
+      final timeA = a.time; //시간 파싱
+      final timeB = b.time; //시간 파싱
 
       bool aFav = favoriteProvider.isFavorite(a.friendName); //즐겨찾기 여부 확인
       bool bFav = favoriteProvider.isFavorite(b.friendName); //즐겨찾기 여부 확인
@@ -230,7 +221,7 @@ class ChatListScreen extends StatelessWidget //채팅 목록 화면 클래스
           //time
           Text //시간 텍스트
           (
-            chat.time, //시간
+            formatChatTime(chat.time), //시간 포맷팅
             style: TextStyle //텍스트 스타일
             (
               color: theme.foreground.withOpacity(0.5), //연한 글자 색상
