@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart'; //플러터 머티리얼 패키지
-import 'package:hanas/providers/friend_request_provider.dart';
 import 'package:provider/provider.dart'; //프로바이더 패키지
+
+import 'package:hanas/models/friend.dart'; //친구 모델
+
 import 'package:hanas/widgets/chat_bubble.dart'; //채팅 말풍선 위젯
 import 'package:hanas/widgets/hanas_header.dart'; //하나스 헤더 위젯
+
 import 'package:hanas/providers/theme_provider.dart'; //테마 프로바이더
 import 'package:hanas/providers/chat_provider.dart'; //채팅 프로바이더
 import 'package:hanas/providers/friend_nickname_provider.dart'; //친구 별명 프로바이더
@@ -123,16 +126,13 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
   Widget build(BuildContext context) //빌드 메서드
   {
     final theme = context.watch<ThemeProvider>().currentTheme; //현재 테마 가져오기
-
     final friend = ModalRoute.of(context)!.settings.arguments as Friend; //인자 받아오기
-    final friendName = friend.name; //친구 이름 가져오기
-    final friendEmoji = friend.emoji; //친구 이모지 가져오기
 
     final nicknameProvider = context.watch<FriendNicknameProvider>(); //친구 별명 프로바이더
     final chatProvider = context.watch<ChatProvider>(); //채팅 프로바이더
+    
     final messages = chatProvider.messagesFor(friend); //해당 친구와의 메시지 리스트 가져오기
-
-    final displayName = nicknameProvider.displayName(friendName); // 표시용 이름 가져오기
+    final displayName = nicknameProvider.displayName(friend.name); // 표시용 이름 가져오기
 
     return Scaffold //기본 화면 구조
     (
@@ -152,11 +152,7 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
                 (
                   context, //빌드 컨텍스트
                   '/friendDetail', //친구 상세 화면 경로
-                  arguments: 
-                  {
-                    'name': friendName, //친구 이름 전달
-                    'emoji': friendEmoji, //친구 이모지 전달
-                  },
+                  arguments: friend, //친구 데이터 인자 전달
                 );
               },
               child: Row //가로 레이아웃
@@ -195,6 +191,7 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
             ),
             onBack: () => Navigator.pop(context), //뒤로가기 콜백
           ),
+
           //메시지 표시 영역
           Expanded //확장 위젯
           (
@@ -207,19 +204,20 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
               {
                 final msg = messages[index]; //현재 메시지
                 final showHeader = index == 0 ||
-                    !_isSameDay(msg.time, messages[index - 1].time); //날짜 헤더 표시 여부
+                    !_isSameDay(msg.createdAt, messages[index - 1].createdAt); //날짜 헤더 표시 여부
+                final displayText = msg.isDeleted ? "[삭제된 메시지]" : msg.text; //삭제된 메시지 표시 처리
 
                 return Column //세로 레이아웃
                 (
                   children: //자식 위젯들
                   [
                     if (showHeader) //날짜 헤더 표시 여부
-                      _buildDateDivider(msg.time, theme), //날짜 구분자
+                      _buildDateDivider(msg.createdAt, theme), //날짜 구분자
                     ChatBubble //채팅 말풍선
                     (
-                      message: msg.text, //메시지 내용
+                      message: displayText, //메시지 내용
                       isMine: msg.isMine, //내 메시지 여부
-                      time: _formatTime(msg.time), //메시지 시간
+                      time: _formatTime(msg.createdAt), //메시지 시간
                     ),
                   ],
                 );

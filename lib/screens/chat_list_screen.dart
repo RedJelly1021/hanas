@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart'; //플러터 머티리얼 패키지
 import 'package:provider/provider.dart'; //프로바이더 패키지
+
 import 'package:hanas/widgets/hanas_card.dart'; //하나스 카드 위젯 패키지
 import 'package:hanas/widgets/hanas_header.dart'; //하나스 헤더 위젯 패키지
+
 import 'package:hanas/models/chat_preview.dart'; //채팅 미리보기 모델 패키지
+
 import 'package:hanas/providers/chat_provider.dart'; //채팅 프로바이더 패키지
 import 'package:hanas/providers/theme_provider.dart'; //테마 프로바이더 패키지
 import 'package:hanas/providers/friends_provider.dart'; //친구 프로바이더 패키지
@@ -138,6 +141,9 @@ class ChatListScreen extends StatelessWidget //채팅 목록 화면 클래스
     FriendsProvider friendsProvider, //친구 프로바이더
   )
   {
+    final lastMsg = chat.isDeleted ? "[삭제된 메시지]" : chat.lastMessage; //마지막 메시지 처리
+    final unread = chat.unreadCount; //읽지 않은 메시지 수
+
     return HanasCard //탭 감지기
     (
       background: theme.cardColor, //카드 배경색
@@ -148,6 +154,7 @@ class ChatListScreen extends StatelessWidget //채팅 목록 화면 클래스
       {
         final friend = friendsProvider.getFriend(chat.friendName); //친구 데이터 가져오기
         if (friend == null) return; //친구가 없으면 리턴
+
         Navigator.pushNamed //네비게이터로 화면 이동
         (
           context, //현재 컨텍스트
@@ -193,7 +200,7 @@ class ChatListScreen extends StatelessWidget //채팅 목록 화면 클래스
                 const SizedBox(height: 6), //간격
                 Text //마지막 메시지
                 (
-                  chat.lastMessage, //마지막 메시지 텍스트
+                  lastMsg, //마지막 메시지 텍스트
                   maxLines: 1, //최대 1줄
                   overflow: TextOverflow.ellipsis, //넘치면 말줄임표
                   style: TextStyle //텍스트 스타일
@@ -205,15 +212,45 @@ class ChatListScreen extends StatelessWidget //채팅 목록 화면 클래스
               ],
             ),
           ),
-          //time
-          Text //시간 텍스트
+
+          Column
           (
-            formatChatTime(chat.time), //시간 포맷팅
-            style: TextStyle //텍스트 스타일
-            (
-              color: theme.foreground.withOpacity(0.5), //연한 글자 색상
-              fontSize: 12, //폰트 크기
-            ),
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: 
+            [
+              Text
+              (
+                formatChatTime(chat.time), //시간 포맷팅
+                style: TextStyle
+                (
+                  color: theme.foreground.withOpacity(0.5), //연한 글자 색상
+                  fontSize: 12, //폰트 크기
+                ),
+              ),
+
+              const SizedBox(height: 6), //간격
+
+              if (unread > 0) //읽지 않은 메시지가 있으면
+              Container //읽지 않은 메시지 수 컨테이너
+              (
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), //패딩
+                decoration: BoxDecoration //박스 데코레이션
+                (
+                  color: theme.primary, //핑크색 배경
+                  borderRadius: BorderRadius.circular(12), //둥근 모서리
+                ),
+                child: Text //읽지 않은 메시지 수 텍스트
+                (
+                  unread.toString(), //읽지 않은 메시지 수
+                  style: const TextStyle //텍스트 스타일
+                  (
+                    color: Colors.white, //흰색 글자
+                    fontSize: 11, //폰트 크기
+                    fontWeight: FontWeight.bold, //굵게
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
