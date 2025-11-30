@@ -20,28 +20,55 @@ class ChatScreen extends StatefulWidget //채팅 화면 클래스
 
 class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래스
 {
-  final TextEditingController _controller = TextEditingController(); //텍스트 컨트롤러
+  String? _editingMessageId; //편집 중인 메시지 ID
+  final TextEditingController _editController = TextEditingController(); //텍스트 컨트롤러
   final ScrollController _scrollController = ScrollController(); //스크롤 컨트롤러
+
+  bool _didMarkReadOnce = false; //읽음 상태 표시 변수
+
+  void _markRead(Friend friend) //메시지 읽음 상태 표시 메서드
+  {
+    final chatProvider = context.read<ChatProvider>(); //채팅 프로바이더 가져오기
+    chatProvider.markAsRead(friend); //메시지 읽음 상태 업데이트
+  }
+
+  int _prevMessageCount = 0; //이전 메시지 개수 변수
 
   @override
   void dispose() //해제 메서드
   {
-    _controller.dispose(); //텍스트 컨트롤러 해제
+    _editController.dispose(); //텍스트 컨트롤러 해제
     _scrollController.dispose(); //스크롤 컨트롤러 해제
     super.dispose(); //부모 해제 호출
   }
 
+  @override
+  void didChangeDependencies() //종속성 변경 메서드
+  {
+    super.didChangeDependencies(); //부모 메서드 호출
+
+    if (!_didMarkReadOnce) //아직 읽음 상태가 아니면
+    {
+      final friend = ModalRoute.of(context)!.settings.arguments as Friend; //인자 받아오기
+      _markRead(friend); //메시지 읽음 상태 표시
+      _didMarkReadOnce = true; //읽음 상태로 표시
+    }
+  }
+
   void _sendMessage(Friend friend) //메시지 전송 메서드
   {
-    final text = _controller.text.trim(); //텍스트 가져오기
+    final text = _editController.text.trim(); //텍스트 가져오기
     if (text.isEmpty) return; //빈 텍스트면 리턴
 
     final chatProvider = context.read<ChatProvider>(); //채팅 프로바이더 가져오기
     chatProvider.sendMessage(friend, text);
+    _editController.clear(); //텍스트 필드 비우기
 
-    _controller.clear(); //텍스트 필드 비우기
+    _scrollToBottom(); //아래로 스크롤
+  }
 
-    //메시지 추가 후 자동으로 아래로 스크롤
+  void _scrollToBottom() //아래로 스크롤 메서드
+  {
     WidgetsBinding.instance.addPostFrameCallback((_) //프레임 후 콜백
     {
       if (_scrollController.hasClients) //스크롤 컨트롤러가 유효하면
@@ -52,16 +79,11 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
           duration: const Duration(milliseconds: 300), //애니메이션 지속 시간
           curve: Curves.easeOutCubic, //애니메이션 곡선
         );
+
+        final friend = ModalRoute.of(context)!.settings.arguments as Friend; //인자 받아오기
+        _markRead(friend); //메시지 읽음 상태 표시
       }
     });
-  }
-
-  //시간 포맷팅 메서드 (예: 14:05 형식)
-  String _formatTime(DateTime time) //시간 포맷팅 메서드
-  {
-    final h = time.hour.toString().padLeft(2, '0'); //시간
-    final m = time.minute.toString().padLeft(2, '0'); //분
-    return "$h:$m"; //포맷된 시간 반환
   }
 
   //날짜 같은지 비교 메서드
@@ -132,7 +154,31 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
     final chatProvider = context.watch<ChatProvider>(); //채팅 프로바이더
     
     final messages = chatProvider.messagesFor(friend); //해당 친구와의 메시지 리스트 가져오기
+
+    WidgetsBinding.instance.addPostFrameCallback((_) //프레임 후 콜백
+    {
+      _markRead(friend); //메시지 읽음 상태 표시
+    });
+
     final displayName = nicknameProvider.displayName(friend.name); // 표시용 이름 가져오기
+
+    if (messages.length != _prevMessageCount) //메시지 개수가 변경되었으면
+    {
+      WidgetsBinding.instance.addPostFrameCallback((_) //프레임 후 콜백
+      {
+        _scrollToBottom(); //아래로 스크롤
+      });
+      _prevMessageCount = messages.length; //이전 메시지 개수 업데이트
+    }
+
+    //키보드 올라올 때 아래로 스크롤    
+    WidgetsBinding.instance.addPostFrameCallback((_)
+    {
+      if (MediaQuery.of(context).viewInsets.bottom > 0) //키보드가 올라왔을 때
+      {
+        _scrollToBottom(); //아래로 스크롤
+      }
+    });
 
     return Scaffold //기본 화면 구조
     (
@@ -205,7 +251,6 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
                 final msg = messages[index]; //현재 메시지
                 final showHeader = index == 0 ||
                     !_isSameDay(msg.createdAt, messages[index - 1].createdAt); //날짜 헤더 표시 여부
-                final displayText = msg.isDeleted ? "[삭제된 메시지]" : msg.text; //삭제된 메시지 표시 처리
 
                 return Column //세로 레이아웃
                 (
@@ -213,12 +258,7 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
                   [
                     if (showHeader) //날짜 헤더 표시 여부
                       _buildDateDivider(msg.createdAt, theme), //날짜 구분자
-                    ChatBubble //채팅 말풍선
-                    (
-                      message: displayText, //메시지 내용
-                      isMine: msg.isMine, //내 메시지 여부
-                      time: _formatTime(msg.createdAt), //메시지 시간
-                    ),
+                    ChatBubble (message: msg,), //채팅 말풍선
                   ],
                 );
               },
@@ -284,7 +324,7 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
                     ),
                     child: TextField //텍스트 필드
                     (
-                      controller: _controller, //텍스트 컨트롤러
+                      controller: _editController, //텍스트 컨트롤러
                       style: TextStyle(color: theme.foreground), //텍스트 스타일
                       decoration: InputDecoration //입력 장식
                       (
