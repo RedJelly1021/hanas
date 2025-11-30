@@ -24,6 +24,9 @@ class HanasTheme //HANAS 테마 클래스
   final Color appBarGradientStart; //앱 바 그라데이션 시작 색상
   final Color appBarGradientEnd; //앱 바 그라데이션 끝 색상
 
+  // Material ThemeData로 변환 기능
+  final ThemeData materialTheme; //머티리얼 테마 데이터
+
   HanasTheme //생성자
   ({
     required this.flowerEmoji, //꽃 이모지
@@ -43,7 +46,35 @@ class HanasTheme //HANAS 테마 클래스
 
     required this.appBarGradientStart, //앱 바 그라데이션 시작 색상
     required this.appBarGradientEnd, //앱 바 그라데이션 끝 색상
+
+    required this.materialTheme, //머티리얼 테마 데이터
   });
+}
+
+ThemeData createThemeData
+({
+  required Color primary,
+  required Color background,
+  required Color foreground,
+})
+{
+  return ThemeData
+  (
+    useMaterial3: true,
+    primaryColor: primary,
+    scaffoldBackgroundColor: background,
+    colorScheme: ColorScheme.fromSeed
+    (
+      seedColor: primary,
+      brightness: Brightness.light,
+    ),
+    textTheme: TextTheme
+    (
+      bodyMedium: TextStyle(color: foreground),
+      bodyLarge: TextStyle(color: foreground),
+      labelLarge: TextStyle(color: foreground),
+    ),
+  );
 }
 
 //3가지 꽃 테마 정의 (원하면 추가 가능, 벚꽃, 해바라기, 라벤더, 수국 등)
@@ -68,6 +99,13 @@ final List<HanasTheme> hanasThemes =
 
     appBarGradientStart: const Color(0xFFFFE5EE),
     appBarGradientEnd: const Color(0xFFFFC8DA),
+
+    materialTheme: createThemeData
+    (
+      primary: const Color(0xFFFF6F9C),
+      background: const Color(0xFFFFE5EE),
+      foreground: const Color(0xFF6A0035),
+    ),
   ),
   HanasTheme //라벤더 블라썸 테마
   (
@@ -88,6 +126,13 @@ final List<HanasTheme> hanasThemes =
 
     appBarGradientStart: const Color(0xFFF5EDFF),
     appBarGradientEnd: const Color(0xFFE6D8FF),
+
+    materialTheme: createThemeData
+    (
+      primary: const Color(0xFFA98FFF),
+      background: const Color(0xFFF5EDFF),
+      foreground: const Color(0xFF4A3F6D),
+    ),
   ),
   HanasTheme //수국 블라썸 테마
   (
@@ -108,6 +153,13 @@ final List<HanasTheme> hanasThemes =
 
     appBarGradientStart: const Color(0xFFE7F6FF),
     appBarGradientEnd: const Color(0xFFC0E9FF),
+
+    materialTheme: createThemeData
+    (
+      primary: const Color(0xFF78C8FF),
+      background: const Color(0xFFE7F6FF),
+      foreground: const Color(0xFF004F7E),
+    ),
   ),
   HanasTheme //해바라기 블라썸 테마
   (
@@ -128,5 +180,12 @@ final List<HanasTheme> hanasThemes =
 
     appBarGradientStart: const Color(0xFFFFF8D6),
     appBarGradientEnd: const Color(0xFFFFEFA8),
+
+    materialTheme: createThemeData
+    (
+      primary: const Color(0xFFE9C400),
+      background: const Color(0xFFFFF8D6),
+      foreground: const Color(0xFF5A4300),
+    ),
   ),
 ];
