@@ -85,7 +85,7 @@ class SettingsScreen extends StatelessWidget //설정 화면 클래스
                   {
                     //TODO :이후 기능 구현
                   },
-                  activeColor: theme.primary, //활성화 색상
+                  activeThumbColor: theme.primary, //활성화 색상
                 ),
 
                 //section 4 : app info
