@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart'; //Flutter 기본 패키지
+import 'package:hanas/models/friend.dart';
 
 //친구 검색용 간단 유저 모델
 class HanasUserStub
@@ -24,14 +25,6 @@ class FriendRequest
     required this.emoji, //요청자 이모지
     required this.inIncoming, //수신/발신 여부
   });
-}
-
-class Friend
-{
-  final String name; //친구 이름
-  final String emoji; //친구 이모지
-
-  Friend(this.name, this.emoji); //생성자
 }
 
 //친구 요청 / 친구 검색 상태 관리 프로바이더
@@ -86,9 +79,9 @@ class FriendRequestProvider extends ChangeNotifier //ChangeNotifier 상속
     //이미 친구인 사람 예시
     _friends.addAll
     ([
-      Friend("아람찌", "😍"),
-      Friend("윤이", "👧🏻"),
-      Friend("유리", "🌼"),
+      Friend(name: "아람찌", emoji: "😍"),
+      Friend(name: "윤이", emoji: "👧🏻"),
+      Friend(name: "유리", emoji: "🌼"),
     ]);
   }
 
@@ -145,7 +138,7 @@ class FriendRequestProvider extends ChangeNotifier //ChangeNotifier 상속
 
       if (!_friends.any((friend) => friend.name == user.name)) //아직 친구가 아니면
       {
-        _friends.add(Friend(user.name, user.emoji)); //친구 목록에 추가
+        _friends.add(Friend(name: user.name, emoji: user.emoji)); //친구 목록에 추가
       }
       notifyListeners(); //상태 변경 알림
       return;
@@ -176,7 +169,7 @@ class FriendRequestProvider extends ChangeNotifier //ChangeNotifier 상속
 
     if (!_friends.any((friend) => friend.name == req.name)) //아직 친구가 아니면
     {
-      _friends.add(Friend(req.name, req.emoji)); //친구 목록에 추가
+      _friends.add(Friend(name: req.name, emoji: req.emoji)); //친구 목록에 추가
     }
     notifyListeners(); //상태 변경 알림
   }
