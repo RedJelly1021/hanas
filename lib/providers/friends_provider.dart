@@ -69,4 +69,17 @@ class FriendsProvider extends ChangeNotifier //친구 관리 프로바이더
     _friends.add(friend); //추가
     notifyListeners(); //변경 사항 알림
   }
+
+  // 6) 특정 이름의 Friend 객체 반환
+  Friend? getFriend(String name) //이름으로 친구 객체 반환
+  {
+    try 
+    {
+      return _friends.firstWhere((f) => f.name == name); //이름으로 친구 찾기
+    } 
+    catch (e) 
+    {
+      return null; //없으면 null 반환
+    }
+  }
 }

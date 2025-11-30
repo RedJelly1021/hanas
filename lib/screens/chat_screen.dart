@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart'; //플러터 머티리얼 패키지
+import 'package:hanas/providers/friend_request_provider.dart';
 import 'package:provider/provider.dart'; //프로바이더 패키지
 import 'package:hanas/widgets/chat_bubble.dart'; //채팅 말풍선 위젯
 import 'package:hanas/widgets/hanas_header.dart'; //하나스 헤더 위젯
-import 'package:hanas/models/chat_message.dart'; //채팅 메시지 모델
 import 'package:hanas/providers/theme_provider.dart'; //테마 프로바이더
+import 'package:hanas/providers/chat_provider.dart'; //채팅 프로바이더
 import 'package:hanas/providers/friend_nickname_provider.dart'; //친구 별명 프로바이더
 
 class ChatScreen extends StatefulWidget //채팅 화면 클래스
@@ -16,7 +17,6 @@ class ChatScreen extends StatefulWidget //채팅 화면 클래스
 
 class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래스
 {
-  final List<ChatMessage> messages = []; //채팅 메시지 리스트
   final TextEditingController _controller = TextEditingController(); //텍스트 컨트롤러
   final ScrollController _scrollController = ScrollController(); //스크롤 컨트롤러
 
@@ -28,23 +28,13 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
     super.dispose(); //부모 해제 호출
   }
 
-  void _sendMessage() //메시지 전송 메서드
+  void _sendMessage(Friend friend) //메시지 전송 메서드
   {
     final text = _controller.text.trim(); //텍스트 가져오기
     if (text.isEmpty) return; //빈 텍스트면 리턴
 
-    setState(() //상태 변경
-    {
-      messages.add //새 메시지 추가
-      (
-        ChatMessage //새 채팅 메시지
-        (
-          text: text, //메시지 텍스트
-          time: DateTime.now(), 
-          isMine: true, //내 메시지 여부
-        ),
-      ); //메시지 리스트에 추가
-    });
+    final chatProvider = context.read<ChatProvider>(); //채팅 프로바이더 가져오기
+    chatProvider.sendMessage(friend, text);
 
     _controller.clear(); //텍스트 필드 비우기
 
@@ -66,9 +56,6 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
   //시간 포맷팅 메서드 (예: 14:05 형식)
   String _formatTime(DateTime time) //시간 포맷팅 메서드
   {
-    // final now = DateTime.now(); //현재 시간 가져오기
-    // return "${now.hour}:${now.minute.toString().padLeft(2, '0')}"; //시간 형식화
-
     final h = time.hour.toString().padLeft(2, '0'); //시간
     final m = time.minute.toString().padLeft(2, '0'); //분
     return "$h:$m"; //포맷된 시간 반환
@@ -135,12 +122,16 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
   @override
   Widget build(BuildContext context) //빌드 메서드
   {
-    final theme = Provider.of<ThemeProvider>(context).currentTheme; //현재 테마 가져오기
-    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
-    final friendName = args['name']; //친구 이름 가져오기
-    final friendEmoji = args['emoji']; //친구 이모지 가져오기
+    final theme = context.watch<ThemeProvider>().currentTheme; //현재 테마 가져오기
 
-    final nicknameProvider = Provider.of<FriendNicknameProvider>(context);
+    final friend = ModalRoute.of(context)!.settings.arguments as Friend; //인자 받아오기
+    final friendName = friend.name; //친구 이름 가져오기
+    final friendEmoji = friend.emoji; //친구 이모지 가져오기
+
+    final nicknameProvider = context.watch<FriendNicknameProvider>(); //친구 별명 프로바이더
+    final chatProvider = context.watch<ChatProvider>(); //채팅 프로바이더
+    final messages = chatProvider.messagesFor(friend); //해당 친구와의 메시지 리스트 가져오기
+
     final displayName = nicknameProvider.displayName(friendName); // 표시용 이름 가져오기
 
     return Scaffold //기본 화면 구조
@@ -153,8 +144,6 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
           //헤더 영역
           HanasHeader //헤더 위젯
           (
-            //title: friendName, //헤더 제목
-            //title: displayName, //별명 있으면 별명, 없으면 원래 이름
             title: GestureDetector
             (
               onTap: () //탭 이벤트
@@ -177,7 +166,7 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
                 [
                   Column //세로 레이아웃
                   (
-                    crossAxisAlignment: CrossAxisAlignment.start, //왼쪽 정렬
+                    crossAxisAlignment: CrossAxisAlignment.center, //가운데 정렬
                     children: //자식 위젯들
                     [
                       Text //별명 또는 원래 이름 텍스트
@@ -186,8 +175,8 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
                         style: TextStyle //텍스트 스타일
                         (
                           fontSize: 17, //폰트 크기
-                          color: theme.foreground, //텍스트 색상
                           fontWeight: FontWeight.bold, //굵은 글씨
+                          color: theme.foreground, //텍스트 색상
                         ),
                       ),
                       Text //프로필 보기 텍스트
@@ -214,36 +203,23 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
               controller: _scrollController, //스크롤 컨트롤러
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), //패딩
               itemCount: messages.length, //메시지 개수
-              itemBuilder: (context, index) //아이템 빌더
+              itemBuilder: (_, index) //아이템 빌더
               {
-                final message = messages[index]; //현재 메시지
-                final isMine = message.isMine; //내 메시지 여부
-                bool showDateHeader = false; //날짜 헤더 표시 여부
-
-                if (index == 0) //첫 메시지인지 확인
-                {
-                  showDateHeader = true; //첫 메시지면 날짜 헤더 표시
-                }
-                else //첫 메시지가 아니면
-                {
-                  final prevMessage = messages[index - 1]; //이전 메시지
-                  if (!_isSameDay(message.time, prevMessage.time)) //다른 날인지 확인
-                  {
-                    showDateHeader = true; //다른 날이면 날짜 헤더 표시
-                  }
-                }
+                final msg = messages[index]; //현재 메시지
+                final showHeader = index == 0 ||
+                    !_isSameDay(msg.time, messages[index - 1].time); //날짜 헤더 표시 여부
 
                 return Column //세로 레이아웃
                 (
                   children: //자식 위젯들
                   [
-                    if (showDateHeader) //날짜 헤더 표시 여부
-                      _buildDateDivider(message.time, theme), //날짜 구분자
+                    if (showHeader) //날짜 헤더 표시 여부
+                      _buildDateDivider(msg.time, theme), //날짜 구분자
                     ChatBubble //채팅 말풍선
                     (
-                      message: message.text, //메시지 내용
-                      isMine: isMine, //내 메시지 여부
-                      time: _formatTime(message.time), //메시지 시간
+                      message: msg.text, //메시지 내용
+                      isMine: msg.isMine, //내 메시지 여부
+                      time: _formatTime(msg.time), //메시지 시간
                     ),
                   ],
                 );
@@ -322,7 +298,7 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
                         border: InputBorder.none, //테두리 없음
                         //isCollapsed: true, //내부 여백 최소화
                       ),
-                      onSubmitted: (_) => _sendMessage(), //엔터키로 전송
+                      onSubmitted: (_) => _sendMessage(friend), //엔터키로 전송
                     ),
                   ),
                 ),
@@ -351,7 +327,7 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
                     Icons.send, //전송 아이콘
                     color: theme.primary, //아이콘 색상
                   ), //핑크색 전송 아이콘
-                  onPressed: _sendMessage, //전송 버튼 클릭
+                  onPressed : () => _sendMessage(friend), //전송 버튼 클릭
                 )
               ],
             ),

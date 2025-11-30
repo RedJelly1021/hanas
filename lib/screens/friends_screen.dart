@@ -2,11 +2,8 @@ import 'package:flutter/material.dart'; //Flutter 기본 패키지
 import 'package:provider/provider.dart'; //상태 관리 패키지
 import 'package:hanas/widgets/hanas_card.dart'; //커스텀 카드 위젯
 import 'package:hanas/widgets/hanas_header.dart'; //커스텀 헤더 위젯
-import 'package:hanas/models/friend.dart'; //친구 모델
 import 'package:hanas/providers/theme_provider.dart'; //테마 제공자
-import 'package:hanas/providers/favorite_provider.dart'; //즐겨찾기 제공자
-import 'package:hanas/providers/friend_nickname_provider.dart'; //친구 별명 제공자
-import 'package:hanas/providers/friend_request_provider.dart' hide Friend; //친구 요청 제공자
+import 'package:hanas/providers/friends_provider.dart'; //친구 제공자
 
 class FriendsScreen extends StatefulWidget //친구 목록 화면 클래스
 {
@@ -20,34 +17,19 @@ class _FriendsScreenState extends State<FriendsScreen> //친구 목록 화면 �
 {
   String _searchQuery = ""; //검색 쿼리 상태 변수
 
-  // 임시 이모지 맵 (Firebase 도입 전)
-  final List<Friend> mockFriends = //임시 친구 목록
-  [
-    Friend(name: "민수", emoji: "🐱"),
-    Friend(name: "지연", emoji: "🐰"),
-    Friend(name: "현우", emoji: "🦊"),
-    Friend(name: "수아", emoji: "🐼"),
-    Friend(name: "준호", emoji: "🐸"),
-    Friend(name: "예린", emoji: "🦄"),
-    Friend(name: "태민", emoji: "🐨"),
-    Friend(name: "서연", emoji: "🐥"),
-  ];
-
   @override
   Widget build(BuildContext context) //빌드 메서드
   {
-    final theme = Provider.of<ThemeProvider>(context).currentTheme; //현재 테마 가져오기
-    final favoriteProvider = Provider.of<FavoriteProvider>(context); //즐겨찾기 제공자 가져오기
-    final nicknameProvider = Provider.of<FriendNicknameProvider>(context); //친구 별명 제공자 가져오기
-    final friendRequestProvider = Provider.of<FriendRequestProvider>(context); //친구 요청 제공자 가져오기
+    final theme = context.watch<ThemeProvider>().currentTheme; //현재 테마 가져오기
+    final friendsProvider = context.watch<FriendsProvider>(); //친구 제공자 가져오기
 
     //1) Provider에서 친구 목록 가져오기
-    final friends = friendRequestProvider.friends; //내 친구 목록 가져오기
+    final friends = friendsProvider.friends; //내 친구 목록 가져오기
 
     //2) 검색 + 즐겨찾기 정렬 있으면 같이 처리
     final filtered = friends.where((friend) //검색 필터링
     {
-      final display = nicknameProvider.displayName(friend.name); //표시용 이름 가져오기
+      final display = friendsProvider.displayName(friend.name); //표시용 이름 가져오기
       if(_searchQuery.isEmpty) return true; //검색어 없으면 모두 표시
       return display.contains(_searchQuery) || friend.name.contains(_searchQuery); //이름 또는 별명에 검색어 포함 여부
     }).toList();
@@ -55,8 +37,8 @@ class _FriendsScreenState extends State<FriendsScreen> //친구 목록 화면 �
     //3) 즐겨찾기 우선 정렬
     final sortedFriends = [...filtered]; //필터링된 친구 목록 복사
     sortedFriends.sort((a, b) { //즐겨찾기 우선 정렬
-      final aFav = favoriteProvider.isFavorite(a.name); //a가 즐겨찾기인지
-      final bFav = favoriteProvider.isFavorite(b.name); //b가 즐겨찾기인지
+      final aFav = friendsProvider.isFavorite(a.name); //a가 즐겨찾기인지
+      final bFav = friendsProvider.isFavorite(b.name); //b가 즐겨찾기인지
       if (aFav&&!bFav) return -1; //a가 즐겨찾기고 b가 아니면 a가 먼저
       if (!aFav&&bFav) return 1; //b가 즐겨찾기고 a가 아니면 b가 먼저
       return a.name.compareTo(b.name); //둘 다 같으면 이름순 정렬
@@ -166,12 +148,7 @@ class _FriendsScreenState extends State<FriendsScreen> //친구 목록 화면 �
                     (
                       context, //현재 컨텍스트
                       '/friendDetail', //친구 상세 화면 경로
-                      arguments: //전달할 인자들
-                      {
-                        'name': friend.name, //친구 이름 전달
-                        'emoji': friend.emoji, //친구 이모지 전달
-                        //'displayName': nicknameProvider.displayName(friend.name), // 표시용 이름 전달
-                      },
+                      arguments: friend, //친구 데이터 인자 전달
                     ); //채팅 화면으로 이동
                   },
                   child: ListTile //리스트 타일
@@ -184,7 +161,7 @@ class _FriendsScreenState extends State<FriendsScreen> //친구 목록 화면 �
                     title: Text //친구 이름
                     (
                       //friend.name, //이름 텍스트
-                      nicknameProvider.displayName(friend.name), //별명 있으면 별명, 없으면 원래 이름
+                      friendsProvider.displayName(friend.name), //별명 있으면 별명, 없으면 원래 이름
                       style: TextStyle //텍스트 스타일
                       (
                         fontSize: 18, //글자 크기
@@ -199,16 +176,17 @@ class _FriendsScreenState extends State<FriendsScreen> //친구 목록 화면 �
                       [ 
                         GestureDetector //즐겨찾기 아이콘 감지기
                         (
+                          behavior: HitTestBehavior.translucent, //투명한 영역도 탭 감지
                           onTap: () //탭했을 때
                           {
-                            favoriteProvider.toggleFavorite(friend.name); //즐겨찾기 토글
+                            friendsProvider.toggleFavorite(friend.name); //즐겨찾기 토글
                           },
                           child: Icon //즐겨찾기 아이콘
                           (
-                            favoriteProvider.isFavorite(friend.name) //즐겨찾기 여부에 따른 아이콘
+                            friendsProvider.isFavorite(friend.name) //즐겨찾기 여부에 따른 아이콘
                                 ? Icons.star //즐겨찾기 아이콘
                                 : Icons.star_border, //비즐겨찾기 아이콘
-                            color: favoriteProvider.isFavorite(friend.name) //아이콘 색상
+                            color: friendsProvider.isFavorite(friend.name) //아이콘 색상
                                 ? theme.primary //즐겨찾기면 주요 색상
                                 : theme.foreground.withOpacity(0.4), //비즐겨찾기면 연한 색상
                           ),

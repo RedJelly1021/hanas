@@ -1,29 +1,12 @@
 import 'package:flutter/material.dart'; //플러터 머티리얼 패키지
 import 'package:provider/provider.dart'; //프로바이더 패키지
-import 'package:hanas/theme/hanas_theme.dart'; //하나스 테마 패키지
 import 'package:hanas/widgets/hanas_card.dart'; //하나스 카드 위젯 패키지
 import 'package:hanas/widgets/hanas_header.dart'; //하나스 헤더 위젯 패키지
 import 'package:hanas/models/chat_preview.dart'; //채팅 미리보기 모델 패키지
+import 'package:hanas/providers/chat_provider.dart'; //채팅 프로바이더 패키지
 import 'package:hanas/providers/theme_provider.dart'; //테마 프로바이더 패키지
-import 'package:hanas/providers/favorite_provider.dart'; //즐겨찾기 프로바이더 패키지
+import 'package:hanas/providers/friends_provider.dart'; //친구 프로바이더 패키지
 import 'package:hanas/providers/friend_nickname_provider.dart'; //친구 별명 프로바이더 패키지
-
-final mockChats = <ChatPreview>//모의 채팅 데이터
-[
-  ChatPreview
-  (
-    friendName: "아람찌", emoji: "😍", 
-    lastMessage: "내일 영화 보러 갈래?", time: DateTime.now().subtract(const Duration(minutes: 5))
-  ),
-  ChatPreview(
-    friendName: "윤이", emoji: "👧🏻", 
-    lastMessage: "오늘 저녁 뭐 먹을래?", time: DateTime.now().subtract(const Duration(hours: 1))
-  ),
-  ChatPreview(
-    friendName: "유리", emoji: "🌼", 
-    lastMessage: "응응! 알겠어", time: DateTime.now().subtract(const Duration(hours: 5))
-  ),
-];
 
 String formatChatTime(DateTime time)
 {
@@ -42,19 +25,20 @@ class ChatListScreen extends StatelessWidget //채팅 목록 화면 클래스
   @override
   Widget build(BuildContext context) //빌드 메서드
   {
-    final theme = Provider.of<ThemeProvider>(context).currentTheme; //현재 테마 가져오기
-    final nicknameProvider = Provider.of<FriendNicknameProvider>(context); //친구 별명 프로바이더 가져오기
-    final favoriteProvider = Provider.of<FavoriteProvider>(context); //즐겨찾기 프로바이더 가져오기
+    final theme = context.watch<ThemeProvider>().currentTheme; //현재 테마 가져오기
+    final chatProvider = context.watch<ChatProvider>(); //채팅 프로바이더 가져오기
+    final friendsProvider = context.watch<FriendsProvider>(); //친구 프로바이더 가져오기
+    final nicknameProvider = context.watch<FriendNicknameProvider>(); //친구 별명 프로바이더 가져오기
 
-    final sortedChats = [...mockChats]; //채팅 목록 복사
+    final sortedChats = [...chatProvider.chatPreviews]; //채팅 목록 복사
 
     sortedChats.sort((a, b) //채팅 목록 정렬
     {
       final timeA = a.time; //시간 파싱
       final timeB = b.time; //시간 파싱
 
-      bool aFav = favoriteProvider.isFavorite(a.friendName); //즐겨찾기 여부 확인
-      bool bFav = favoriteProvider.isFavorite(b.friendName); //즐겨찾기 여부 확인
+      bool aFav = friendsProvider.isFavorite(a.friendName); //즐겨찾기 여부 확인
+      bool bFav = friendsProvider.isFavorite(b.friendName); //즐겨찾기 여부 확인
 
       if (aFav && !bFav) return -1; //a가 즐겨찾기고 b가 아니면 a가 먼저
       if (!aFav && bFav) return 1; //b가 즐겨찾기고 a가 아니면 b가 먼저
@@ -63,9 +47,9 @@ class ChatListScreen extends StatelessWidget //채팅 목록 화면 클래스
     });
 
     final favoriteChats = //즐겨찾기 채팅 목록
-      sortedChats.where((chat) => favoriteProvider.isFavorite(chat.friendName)).toList();
+      sortedChats.where((chat) => friendsProvider.isFavorite(chat.friendName)).toList();
     final normalChats = //일반 채팅 목록
-      sortedChats.where((chat) => !favoriteProvider.isFavorite(chat.friendName)).toList();
+      sortedChats.where((chat) => !friendsProvider.isFavorite(chat.friendName)).toList();
 
     return Scaffold //기본 화면 구조
     (
@@ -120,7 +104,7 @@ class ChatListScreen extends StatelessWidget //채팅 목록 화면 클래스
                     ),
                   ),
                 ),
-                ...favoriteChats.map((chat) => _buildChatCard(context, chat, theme, nicknameProvider)), //즐겨찾기 채팅 카드들
+                ...favoriteChats.map((chat) => _buildChatCard(context, chat, theme, nicknameProvider, friendsProvider)), //즐겨찾기 채팅 카드들
                 ],
                 Padding //전체 채팅 텍스트
                 (
@@ -136,7 +120,7 @@ class ChatListScreen extends StatelessWidget //채팅 목록 화면 클래스
                     ),
                   ),
                 ),
-                ...normalChats.map((chat) => _buildChatCard(context, chat, theme, nicknameProvider)), //일반 채팅 카드들
+                ...normalChats.map((chat) => _buildChatCard(context, chat, theme, nicknameProvider, friendsProvider)), //일반 채팅 카드들
               ],
             ),
           ),
@@ -149,8 +133,9 @@ class ChatListScreen extends StatelessWidget //채팅 목록 화면 클래스
   (
     BuildContext context, //빌드 컨텍스트
     ChatPreview chat, //채팅 미리보기 모델
-    HanasTheme theme, //하나스 테마
+    theme, //하나스 테마
     FriendNicknameProvider nicknameProvider, //친구 별명 프로바이더
+    FriendsProvider friendsProvider, //친구 프로바이더
   )
   {
     return HanasCard //탭 감지기
@@ -161,12 +146,14 @@ class ChatListScreen extends StatelessWidget //채팅 목록 화면 클래스
       shadowOpacity: 0.35, //그림자 불투명도
       onTap: () //탭했을 때
       {
-        Navigator.pushNamed //채팅 화면으로 이동
+        final friend = friendsProvider.getFriend(chat.friendName); //친구 데이터 가져오기
+        if (friend == null) return; //친구가 없으면 리턴
+        Navigator.pushNamed //네비게이터로 화면 이동
         (
-          context, //빌드 컨텍스트
+          context, //현재 컨텍스트
           '/chat', //채팅 화면 경로
-          arguments: chat.friendName, //친구 이름 전달
-        );
+          arguments: friend, //친구 데이터 인자 전달
+        ); //채팅 화면으로 이동
       },
       child: Row //가로 레이아웃
       (
@@ -233,43 +220,3 @@ class ChatListScreen extends StatelessWidget //채팅 목록 화면 클래스
     );
   }
 }
-
-/*
-return Card //채팅 카드
-(
-  color: Colors.white, //흰색 카드
-  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), //카드 마진
-  shape: RoundedRectangleBorder //둥근 모서리
-  (
-    borderRadius: BorderRadius.circular(16), //모서리 반경
-  ),
-  child: ListTile //리스트 타일
-  (
-    leading: Text //친구 이모지
-    (
-      chat.emoji, //이모지 텍스트
-      style: const TextStyle(fontSize: 32), //이모지 크기
-    ),
-    title: Text //친구 이름
-    (
-      chat.friendName, //이름 텍스트
-      style: const TextStyle //텍스트 스타일
-      (
-        color: theme.primary, //핑크색 텍스트
-        fontWeight: FontWeight.w600, //약간 굵게
-      ),
-    ),
-    subtitle: Text(chat.lastMessage), //마지막 메시지
-    trailing: const Icon(Icons.chevron_right, color: theme.primary), //오른쪽 화살표 아이콘
-    onTap: () //탭 이벤트
-    {
-      Navigator.pushNamed //채팅 화면으로 이동
-      (
-        context, //현재 컨텍스트
-        '/chat', //경로
-        arguments: chat.friendName, //친구 이름 전달
-      );
-    },
-  ),
-);
-*/

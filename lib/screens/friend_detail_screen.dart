@@ -3,9 +3,7 @@ import 'package:provider/provider.dart'; // 프로바이더 패키지
 import 'package:hanas/widgets/hanas_header.dart'; // 하나스 헤더 위젯
 import 'package:hanas/models/friend.dart'; // 친구 모델
 import 'package:hanas/providers/theme_provider.dart'; // 테마 프로바이더
-import 'package:hanas/providers/favorite_provider.dart'; // 즐겨찾기 프로바이더
-import 'package:hanas/providers/friend_nickname_provider.dart'; // 친구 별명 프로바이더
-import 'package:hanas/providers/friend_request_provider.dart' hide Friend; // 친구 요청 프로바이더
+import 'package:hanas/providers/friends_provider.dart'; // 친구 프로바이더
 
 class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
 {
@@ -20,14 +18,12 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
   @override
   Widget build(BuildContext context) // 빌드 메서드
   {
-    final theme = Provider.of<ThemeProvider>(context).currentTheme; // 현재 테마 가져오기
-    final favoriteProvider = Provider.of<FavoriteProvider>(context); // 즐겨찾기 프로바이더 가져오기
-    final nicknameProvider = Provider.of<FriendNicknameProvider>(context); // 친구 별명 프로바이더 가져오기
-    final friendRequestProvider = Provider.of<FriendRequestProvider>(context); // 친구 요청 프로바이더 가져오기
+    final theme = context.watch<ThemeProvider>().currentTheme; // 현재 테마 가져오기
+    final friendsProvider = context.watch<FriendsProvider>(); // 친구 프로바이더 가져오기
 
-    final displayName = nicknameProvider.displayName(friend.name); // 표시용 이름 가져오기
-    final currentNickname = nicknameProvider.getNickname(friend.name); // 현재 별명 가져오기(있으면)
-    final isFav = favoriteProvider.isFavorite(friend.name); // 즐겨찾기 여부 확인
+    final displayName = friendsProvider.displayName(friend.name); // 표시용 이름 가져오기
+    final currentNickname = friendsProvider.getNickname(friend.name); // 현재 별명 가져오기(있으면)
+    final isFav = friendsProvider.isFavorite(friend.name); // 즐겨찾기 여부 확인
 
     return Scaffold // 스캐폴드 위젯
     (
@@ -127,7 +123,7 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
                 ),
               ),
               onPressed: () { // 버튼 클릭 시
-                favoriteProvider.toggleFavorite(friend.name); // 즐겨찾기 토글
+                friendsProvider.toggleFavorite(friend.name); // 즐겨찾기 토글
               },
               child: Text // 버튼 텍스트
               (
@@ -161,38 +157,35 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
                 final result = await showDialog<String> // 다이얼로그 표시
                 (
                   context: context, // 컨텍스트
-                  builder: (context) // 빌더 함수
-                  {
-                    return AlertDialog // 알림 대화상자
+                  builder: (_) => AlertDialog // 알림 대화상자
+                  (
+                    title: const Text("별명 설정"), // 제목
+                    content: TextField // 텍스트 필드
                     (
-                      title: const Text("별명 설정"), // 제목
-                      content: TextField // 텍스트 필드
+                      controller: controller, // 컨트롤러 설정
+                      decoration: const InputDecoration // 입력 장식
                       (
-                        controller: controller, // 컨트롤러 설정
-                        decoration: const InputDecoration // 입력 장식
-                        (
-                          hintText: "이 친구를 뭐라고 부를까? 🌸", // 힌트 텍스트
-                        ),
+                        hintText: "이 친구를 뭐라고 부를까? 🌸", // 힌트 텍스트
                       ),
-                      actions: // 액션 버튼들
-                      [
-                        TextButton // 텍스트 버튼
-                        (
-                          onPressed: () => Navigator.pop(context),  // 취소 동작
-                          child: const Text("취소") // 버튼 텍스트
-                        ),
-                        TextButton // 텍스트 버튼
-                        (
-                          onPressed: () => Navigator.pop(context, controller.text), // 저장 동작
-                          child: const Text("저장") // 버튼 텍스트
-                        ),
-                      ],
-                    );
-                  },
+                    ),
+                    actions: // 액션 버튼들
+                    [
+                      TextButton // 텍스트 버튼
+                      (
+                        onPressed: () => Navigator.pop(context),  // 취소 동작
+                        child: const Text("취소"), // 버튼 텍스트
+                      ),
+                      TextButton // 텍스트 버튼
+                      (
+                        onPressed: () => Navigator.pop(context, controller.text), // 저장 동작
+                        child: const Text("저장"), // 버튼 텍스트
+                      ),
+                    ],
+                  ),
                 );
                 if (result != null) // 결과가 있으면
                 {
-                  nicknameProvider.setNickname(friend.name, result); // 별명 설정
+                  friendsProvider.setNickname(friend.name, result); // 별명 설정
                 }
               },
               child: Text // 버튼 텍스트
@@ -229,11 +222,7 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
                 (
                   context, // 컨텍스트
                   '/chat', // 경로
-                  arguments: 
-                  {
-                    'name': friend.name, // 친구 이름 전달
-                    'emoji': friend.emoji, // 친구 이모지 전달
-                  },
+                  arguments: friend, // 친구 모델 인자 전달
                 );
               },
               child: const Text // 버튼 텍스트
@@ -272,47 +261,44 @@ class FriendDetailScreen extends StatelessWidget // 친구 상세 정보 화면
                 showDialog
                 (
                   context: context, // 컨텍스트
-                  builder: (context) // 빌더 함수
-                  {
-                    return AlertDialog // 알림 대화상자
+                  builder: (_) =>AlertDialog // 알림 대화상자
+                  (
+                    title: const Text("정말 친구를 삭제할까요?"), // 제목
+                    content: Text
                     (
-                      title: const Text("정말 친구를 삭제할까요?"), // 제목
-                      content: Text
+                      "$displayName 님을 친구 목록에서 삭제합니다.",
+                    ), // 내용
+                    actions: // 액션 버튼들
+                    [
+                      TextButton // 텍스트 버튼
                       (
-                        "$displayName 님을 친구 목록에서 삭제합니다.",
-                      ), // 내용
-                      actions: // 액션 버튼들
-                      [
-                        TextButton // 텍스트 버튼
-                        (
-                          onPressed: () => Navigator.pop(context), // 취소 동작
-                          child: const Text("취소") // 버튼 텍스트
-                        ),
-                        TextButton // 텍스트 버튼
-                        (
-                          onPressed: () // 삭제 동작
-                          {
-                            Navigator.pop(context);
-                            friendRequestProvider.removeFriend(friend.name); // 친구 삭제
-                            Navigator.pop(context); // 이전 화면으로 돌아가기
+                        onPressed: () => Navigator.pop(context), // 취소 동작
+                        child: const Text("취소") // 버튼 텍스트
+                      ),
+                      TextButton // 텍스트 버튼
+                      (
+                        onPressed: () // 삭제 동작
+                        {
+                          Navigator.pop(context);
+                          friendsProvider.removeFriend(friend.name); // 친구 삭제
+                          Navigator.pop(context); // 이전 화면으로 돌아가기
 
-                            ScaffoldMessenger.of(context).showSnackBar // 스낵바 표시
-                            (
-                              SnackBar // 스낵바 위젯
-                              (
-                                content: Text("$displayName 님이 친구 목록에서 삭제되었습니다."), // 스낵바 내용
-                              ),
-                            );
-                          },
-                          child: const Text
+                          ScaffoldMessenger.of(context).showSnackBar // 스낵바 표시
                           (
-                            "삭제", // 버튼 텍스트
-                            style: TextStyle(color: Colors.redAccent), // 텍스트 스타일
-                          ),
+                            SnackBar // 스낵바 위젯
+                            (
+                              content: Text("$displayName 님이 친구 목록에서 삭제되었습니다."), // 스낵바 내용
+                            ),
+                          );
+                        },
+                        child: const Text
+                        (
+                          "삭제", // 버튼 텍스트
+                          style: TextStyle(color: Colors.redAccent), // 텍스트 스타일
                         ),
-                      ],
-                    );
-                  },
+                      ),
+                    ],
+                  ),
                 );
               },
               child: const Text // 버튼 텍스트
