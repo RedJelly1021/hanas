@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart'; //플러터 머티리얼 패키지
-import 'package:hanas/models/chat_message.dart';
 import 'package:provider/provider.dart'; //프로바이더 패키지
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart'; //이모지 피커 패키지
 
 import 'package:hanas/models/friend.dart'; //친구 모델
+import 'package:hanas/models/chat_message.dart'; //채팅 메시지 모델
 
 import 'package:hanas/widgets/chat_bubble.dart'; //채팅 말풍선 위젯
 import 'package:hanas/widgets/hanas_header.dart'; //하나스 헤더 위젯
@@ -25,6 +26,9 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
   final TextEditingController _editController = TextEditingController(); //텍스트 컨트롤러
   final ScrollController _scrollController = ScrollController(); //스크롤 컨트롤러
 
+  bool _isEmojiPickerVisible = false; //이모지 선택기 표시 여부
+  FocusNode _focusNode = FocusNode(); //포커스 노드
+
   bool _didMarkReadOnce = false; //읽음 상태 표시 변수
 
   void _markRead(Friend friend) //메시지 읽음 상태 표시 메서드
@@ -40,6 +44,7 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
   {
     _editController.dispose(); //텍스트 컨트롤러 해제
     _scrollController.dispose(); //스크롤 컨트롤러 해제
+    _focusNode.dispose(); //포커스 노드 해제
     super.dispose(); //부모 해제 호출
   }
 
@@ -159,6 +164,13 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
     WidgetsBinding.instance.addPostFrameCallback((_) //프레임 후 콜백
     {
       _markRead(friend); //메시지 읽음 상태 표시
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_)
+    {
+      if (MediaQuery.of(context).viewInsets.bottom > 0 && _isEmojiPickerVisible) //키보드가 올라왔을 때
+      {
+        setState(() => _isEmojiPickerVisible = false); //이모지 선택기 숨기기
+      }
     });
 
     final displayName = nicknameProvider.displayName(friend.name); // 표시용 이름 가져오기
@@ -404,6 +416,7 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
                     child: TextField //텍스트 필드
                     (
                       controller: _editController, //텍스트 컨트롤러
+                      focusNode: _focusNode, //포커스 노드
                       style: TextStyle(color: theme.foreground), //텍스트 스타일
                       decoration: InputDecoration //입력 장식
                       (
@@ -429,10 +442,8 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
                   ),
                   onPressed: () //버튼 클릭 이벤트
                   {
-                    ScaffoldMessenger.of(context).showSnackBar //스낵바 표시
-                    (
-                      const SnackBar(content: Text("이모지 피커는 나중에!")), //스낵바 내용
-                    );
+                    FocusScope.of(context).unfocus(); //포커스 해제
+                    setState(() => _isEmojiPickerVisible = !_isEmojiPickerVisible); //이모지 선택기 표시 토글
                   },
                 ),
 
@@ -445,10 +456,66 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
                     color: theme.primary, //아이콘 색상
                   ), //핑크색 전송 아이콘
                   onPressed : () => _sendMessage(friend), //전송 버튼 클릭
-                )
-              ],
+                ),
+            ],
             ),
           ),
+        
+          //이모지 선택기
+          if (_isEmojiPickerVisible)
+            SizedBox //이모지 선택기 공간
+            (
+              height: 280, //높이 설정
+              child: EmojiPicker
+              (
+                onEmojiSelected: (category, emoji) //이모지 선택 콜백
+                {
+                  _editController.text += emoji.emoji; //텍스트 필드에 이모지 추가
+                  _editController.selection = TextSelection.fromPosition //커서 위치 설정
+                  (
+                    TextPosition(offset: _editController.text.length) //텍스트 끝으로 커서 이동
+                  );
+                },
+                config: Config(
+                  height: 260,
+                  checkPlatformCompatibility: true,
+                  locale: const Locale('ko'),
+                  emojiViewConfig: EmojiViewConfig
+                  (
+                    emojiSizeMax: 28,
+                    columns: 7,
+                    backgroundColor: theme.background,
+                    verticalSpacing: 6,
+                    horizontalSpacing: 6,
+                  ),
+                  categoryViewConfig: CategoryViewConfig
+                  (
+                    backgroundColor: theme.cardColor,
+                    iconColor: theme.foreground.withOpacity(0.4),
+                    iconColorSelected: theme.primary,
+                    indicatorColor: theme.primary,
+                    initCategory: Category.SMILEYS,
+                  ),
+                  skinToneConfig: SkinToneConfig
+                  (
+                    enabled: true,
+                    dialogBackgroundColor: theme.cardColor,
+                    indicatorColor: theme.primary,
+                  ),
+                  bottomActionBarConfig: BottomActionBarConfig
+                  (
+                    enabled: true,
+                    backgroundColor: theme.cardColor,
+                    buttonIconColor: theme.primary,
+                  ),
+                  customBackspaceIcon: Icon
+                  (
+                    Icons.backspace_rounded,
+                    color: theme.primary,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
