@@ -29,7 +29,7 @@ class ChatProvider extends ChangeNotifier //채팅 관리 프로바이더
       createdAt: now, //현재 시간
       updatedAt: null, //업데이트 시간 초기화
       isMine: true, //내 메시지 여부
-      isRead: true, //읽음 여부
+      isRead: false, //읽음 여부
       isDeleted: false, //삭제 여부
       type: 'text', //메시지 타입
     );
@@ -107,7 +107,7 @@ class ChatProvider extends ChangeNotifier //채팅 관리 프로바이더
       unreadCount: 0, //읽지 않은 메시지 수 초기화
     );
 
-    _previews.add(preview); //미리보기 리스트에 추가
+    //_previews.add(preview); //미리보기 리스트에 추가
     return preview; //새 미리보기 반환
   }
 
@@ -115,16 +115,16 @@ class ChatProvider extends ChangeNotifier //채팅 관리 프로바이더
   void _updatePreviewOnSend(Friend friend, ChatMessage message)
   {
     final idx = _previews.indexWhere((preview) => preview.friendName == friend.name); //미리보기 인덱스 찾기
-    final preview = _ensurePreview(friend); //미리보기 보장
+    final base = (idx != -1) ? _previews[idx] : _ensurePreview(friend); //기존 미리보기 또는 새 미리보기 가져오기
 
-    final updated = preview.copyWith //미리보기 복사본 생성
+    final updated = base.copyWith //미리보기 복사본 생성
     (
       lastMessage: message.text, //마지막 메시지 설정
       time: message.createdAt, //시간 설정
       isDeleted: false, //삭제 상태 설정
       isMine: true, //내 메시지 여부 설정
       type: message.type, //타입 설정
-      unreadCount: preview.unreadCount, //읽지 않은 메시지 수 설정
+      unreadCount: base.unreadCount, //읽지 않은 메시지 수 설정
     );
 
     if (idx == -1) //미리보기가 없으면 추가
@@ -161,15 +161,15 @@ class ChatProvider extends ChangeNotifier //채팅 관리 프로바이더
 
     final last = list.last; //마지막 메시지 가져오기
     final idx = _previews.indexWhere((preview) => preview.friendName == friend.name); //미리보기 인덱스 찾기
-    final preview = _ensurePreview(friend); //미리보기 보장
+    final base = (idx != -1) ? _previews[idx] : _ensurePreview(friend); //기존 미리보기 또는 새 미리보기 가져오기
 
-    final updated = preview.copyWith //미리보기 복사본 생성
+    final updated = base.copyWith //미리보기 복사본 생성
     (
       lastMessage: last.isDeleted ? "[삭제된 메시지]" : last.text, //마지막 메시지 설정
       time: last.createdAt, //시간 설정
       isDeleted: last.isDeleted, //삭제 상태 설정
       isMine: last.isMine, //내 메시지 여부 설정
-      type: last.type, //타입 설정
+      type: last.isDeleted ? 'text' : last.type, //타입 설정
     );
 
     if (idx == -1) //미리보기가 없으면 추가

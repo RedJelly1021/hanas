@@ -39,7 +39,11 @@ class ChatBubble extends StatelessWidget //채팅 말풍선 위젯 클래스
 
     return GestureDetector
     (
-      onLongPress: onLongPress, //롱프레스 콜백 설정
+      onLongPress: ()
+      {
+        Feedback.forLongPress(context); //롱프레스 피드백
+        onLongPress?.call(); //콜백 호출
+      },
       child: TweenAnimationBuilder<double> //트윈 애니메이션 빌더
       (
         tween: Tween<double>(begin: 0.0, end: 1.0), //애니메이션 트윈
@@ -167,8 +171,13 @@ class ChatBubble extends StatelessWidget //채팅 말풍선 위젯 클래스
                           ),
                         )
                       : Text(
-                          "",
+                          "🌸",
                           key: const ValueKey("unread"),
+                          style: TextStyle
+                          (
+                            fontSize: 12,
+                            color: isMine ? Colors.white70 : theme.primary,
+                          ),
                         ),
                 ),
               ),
@@ -187,37 +196,71 @@ class ChatBubble extends StatelessWidget //채팅 말풍선 위젯 클래스
       mainAxisSize: MainAxisSize.min, //최소 크기
       children: 
       [
-        SizedBox
+        Flexible
         (
-          width: 180, //고정 너비
-          child: TextField //텍스트 필드 위젯
+          child: Container
           (
-            controller: editingController, //편집 컨트롤러
-            autofocus: true, //자동 포커스
-            style: const TextStyle(color: Colors.white), //텍스트 스타일
-            decoration: const InputDecoration //입력 장식
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), //내부 여백
+            decoration: BoxDecoration //박스 장식
             (
-              border: InputBorder.none, //테두리 없음
-              hintText: "메시지 수정...", //힌트 텍스트
-              hintStyle: TextStyle(color: Colors.white60), //힌트 텍스트 스타일
+              color: Colors.white.withOpacity(0.15), //배경색
+              borderRadius: BorderRadius.circular(12), //테두리 반경
             ),
-            onSubmitted: (value)
-            {
-              final trimmed = value.trim(); //공백 제거
-              if (trimmed.isEmpty) return; //빈 문자열이면 종료
-              onEditSubmit?.call(trimmed); //제출 콜백 호출
-            }
+            child: TextField //텍스트 필드 위젯
+            (
+              controller: controller, //컨트롤러 설정
+              autofocus: true, //자동 포커스
+              cursorColor: Colors.white70, //커서 색상
+              style: const TextStyle( //텍스트 스타일
+                color: Colors.white, //텍스트 색상
+                fontSize: 15, //폰트 크기
+              ),
+              decoration: const InputDecoration //입력 장식
+              (
+                isDense: true, //조밀한 스타일
+                contentPadding: EdgeInsets.zero, //내용 패딩 없음
+                border: InputBorder.none, //테두리 없음
+                hintText: "메시지 수정...", //힌트 텍스트
+                hintStyle: TextStyle( //힌트 텍스트 스타일
+                  color: Colors.white60, //힌트 텍스트 색상
+                ),
+              ),
+              onSubmitted: (value) 
+              {
+                final trimmed = value.trim(); //공백 제거
+                if (trimmed.isEmpty) return; //빈 문자열이면 반환
+                onEditSubmit?.call(trimmed); //편집 제출 콜백 호출
+              },
+            ),
           ),
         ),
-        IconButton
+
+        const SizedBox(width: 6), //가로 간격
+
+        //체크 버튼 감성적으로(?)
+        GestureDetector //제스처 감지기
         (
-          icon: const Icon(Icons.check, color: Colors.white), //체크 아이콘
-          onPressed: ()
+          onTap: () 
           {
             final trimmed = controller.text.trim(); //공백 제거
-            if (trimmed.isEmpty) return; //빈 문자열이면 종료
-            onEditSubmit?.call(trimmed); //제출 콜백 호출
+            if (trimmed.isEmpty) return; //빈 문자열이면 반환
+            onEditSubmit?.call(trimmed); //편집 제출 콜백 호출
           },
+          child: Container
+          (
+            padding: const EdgeInsets.all(6), //내부 여백
+            decoration: BoxDecoration //박스 장식
+            (
+              color: Colors.white.withOpacity(0.15), //배경색
+              shape: BoxShape.circle, //원형 모양
+            ),
+            child: const Icon //아이콘 위젯
+            (
+              Icons.check, //체크 아이콘
+              size: 18, //아이콘 크기
+              color: Colors.white, //아이콘 색상
+            ),
+          ),
         ),
       ],
     );

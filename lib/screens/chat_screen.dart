@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart'; //플러터 머티리얼 패키지
+import 'package:hanas/models/chat_message.dart';
 import 'package:provider/provider.dart'; //프로바이더 패키지
 
 import 'package:hanas/models/friend.dart'; //친구 모델
@@ -258,13 +259,91 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
                   [
                     if (showHeader) //날짜 헤더 표시 여부
                       _buildDateDivider(msg.createdAt, theme), //날짜 구분자
-                    ChatBubble (message: msg,), //채팅 말풍선
+                    ChatBubble //채팅 말풍선 위젯
+                    (
+                      message: msg, //메시지 데이터
+                      isEditing: _editingMessageId == msg.id, //편집 중인지 여부
+                      editingController: _editingMessageId == msg.id ? _editController : null, //편집 컨트롤러
+                      onEditSubmit: (newText) //편집 제출 콜백
+                      {
+                        final chatProvider = context.read<ChatProvider>(); //채팅 프로바이더 가져오기
+                        chatProvider.editMessage(friend, msg.id, newText); //메시지 업데이트
+                        setState(() => _editingMessageId = null); //편집 모드 종료
+                        _editController.clear(); //편집 컨트롤러 초기화
+                      },
+                      onLongPress: ()
+                      {
+                        _showMessageMenu(context, friend, msg); //메시지 메뉴 표시
+                      },
+                    )
                   ],
                 );
               },
             ),
           ),
 
+          //수정 모드 상태바
+          if (_editingMessageId != null)
+            Container //수정 모드 컨테이너
+            (
+              width: double.infinity, //가로 꽉 채우기
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), //패딩
+              decoration: BoxDecoration //박스 장식
+              (
+                color: theme.cardColor.withOpacity(0.9), //카드 배경색
+                border: Border //테두리
+                (
+                  bottom: BorderSide
+                  (
+                    color: theme.borderColor.withOpacity(0.3), 
+                    width: 1
+                  ), //아래쪽 테두리
+                ),
+              ),
+              child: Row //가로 레이아웃
+              (
+                mainAxisAlignment: MainAxisAlignment.spaceBetween, //양쪽 정렬
+                children: //자식 위젯들
+                [
+                  Row //가로 레이아웃
+                  (
+                    children: //자식 위젯들
+                    [
+                      const Icon(Icons.edit, size: 16), //편집 아이콘
+                      const SizedBox(width: 6), //간격
+                      Text //편집 중 텍스트
+                      (
+                        "메시지 수정 중...", //텍스트 내용
+                        style: TextStyle //텍스트 스타일
+                        (
+                          color: theme.foreground.withOpacity(0.8), //텍스트 색상
+                          fontSize: 13, //폰트 크기
+                        ),
+                      ),
+                    ],
+                  ),
+                  GestureDetector //탭 제스처 위젯
+                  (
+                    onTap: () 
+                    {
+                      setState(() => _editingMessageId = null); //편집 모드 종료
+                      _editController.clear(); //편집 컨트롤러 초기화  
+                    },
+                    child: Text //취소 텍스트
+                    (
+                      "취소", //텍스트 내용
+                      style: TextStyle //텍스트 스타일
+                      (
+                        color: theme.primary, //텍스트 색상
+                        fontSize: 13, //폰트 크기
+                        fontWeight: FontWeight.bold, //굵은 글씨
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+              
           //메시지 입력 영역
           Container //메시지 입력 컨테이너
           (
@@ -374,4 +453,56 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
       ),
     );
   }
+
+  void _showMessageMenu(BuildContext context, Friend friend, ChatMessage message) //메시지 메뉴 표시 함수
+  {
+    showModalBottomSheet
+    (
+      context: context, //빌드 컨텍스트
+      backgroundColor: Theme.of(context).colorScheme.surface, //배경색
+      shape: const RoundedRectangleBorder //모서리 둥글게
+      (
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)), //위쪽 모서리 둥글게
+      ),
+      builder: (_)
+      {
+        return SafeArea //안전 영역 위젯
+        (
+          child: Column //세로 레이아웃
+          (
+            mainAxisSize: MainAxisSize.min, //최소 크기
+            children: 
+            [
+              ListTile //메시지 삭제 옵션
+              (
+                leading: const Icon(Icons.edit), //편집 아이콘
+                title: const Text("메시지 수정"), //메시지 수정 텍스트
+                onTap: () //탭 이벤트
+                {
+                  Navigator.pop(context); //모달 닫기
+                  setState(()
+                  {
+                    _editingMessageId = message.id; //편집 모드로 전환
+                    _editController.text = message.text; //텍스트 컨트롤러에 메시지 내용 설정
+                  });
+                },
+              ),
+              ListTile //메시지 삭제 옵션
+              (
+                leading: const Icon(Icons.delete_outline), //삭제 아이콘
+                title: const Text("메시지 삭제"), //메시지 삭제 텍스트
+                onTap: () //탭 이벤트
+                {
+                  Navigator.pop(context); //모달 닫기
+                  final chatProvider = context.read<ChatProvider>(); //채팅 프로바이더 가져오기
+                  chatProvider.deleteMessage(friend, message.id); //메시지 삭제 호출
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
+
