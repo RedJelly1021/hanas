@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart'; //Flutter 기본 패키지
-import 'package:hanas/models/friend.dart';
+import 'package:hanas/models/friend.dart'; //Friend 모델 임포트
+import 'package:hanas/providers/friends_provider.dart'; //FriendsProvider 임포트
 
 //친구 검색용 간단 유저 모델
 class HanasUserStub
@@ -31,7 +32,7 @@ class FriendRequest
 class FriendRequestProvider extends ChangeNotifier //ChangeNotifier 상속
 {
   //내 친구 목록(간단히 이름만 관리)
-  final List<Friend> _friends = []; //친구 리스트
+  //final List<Friend> _friends = []; //친구 리스트
 
   //나에게 온 요청 목록
   final List<FriendRequest> _incomingRequests = []; //수신 요청 리스트
@@ -75,24 +76,16 @@ class FriendRequestProvider extends ChangeNotifier //ChangeNotifier 상속
         inIncoming: true,
       ),
     ]);
-
-    //이미 친구인 사람 예시
-    _friends.addAll
-    ([
-      Friend(name: "아람찌", emoji: "😍"),
-      Friend(name: "윤이", emoji: "👧🏻"),
-      Friend(name: "유리", emoji: "🌼"),
-    ]);
   }
 
   //getter 들
-  List<Friend> get friends => List.unmodifiable(_friends); //친구 목록
+  //List<Friend> get friends => List.unmodifiable(_friends); //친구 목록
   List<FriendRequest> get incomingRequests => List.unmodifiable(_incomingRequests); //수신 요청 목록
   List<FriendRequest> get outgoingRequests => List.unmodifiable(_outgoingRequests); //발신 요청 목록
 
   //이름으로 내가 이미 친구인지 확인
-  bool isMyFriend(String name) => 
-      _friends.any((friend) => friend.name == name); //친구 목록에 이름이 있는지 확인
+  // bool isMyFriend(String name) => 
+  //     _friends.any((friend) => friend.name == name); //친구 목록에 이름이 있는지 확인
 
   //이름 기준으로 나에게 온 요청이 있는지
   bool hasIncomingRequest(String name) =>
@@ -121,10 +114,10 @@ class FriendRequestProvider extends ChangeNotifier //ChangeNotifier 상속
   }
 
   //친구 추가 요청 보내기
-  void sendFriendRequest(HanasUserStub user) //친구 요청 메서드
+  void sendFriendRequest(HanasUserStub user, FriendsProvider friendsProvider) //친구 요청 메서드
   {
     //이미 친구면 무시
-    if (isMyFriend(user.name)) return;
+    if (friendsProvider.isFriend(user.name)) return;
 
     //이미 보낸 요청이 있으면 무시
     if (hasOutgoingRequest(user.name)) return;
@@ -135,11 +128,12 @@ class FriendRequestProvider extends ChangeNotifier //ChangeNotifier 상속
     if (existingIncoming.isNotEmpty) //기존 수신 요청이 있으면
     {
       _incomingRequests.removeWhere((req) => req.name == user.name); //기존 수신 요청 제거
+      friendsProvider.addFriend(Friend(name: user.name, emoji: user.emoji)); //친구 목록에 추가
 
-      if (!_friends.any((friend) => friend.name == user.name)) //아직 친구가 아니면
-      {
-        _friends.add(Friend(name: user.name, emoji: user.emoji)); //친구 목록에 추가
-      }
+      // if (!_friends.any((friend) => friend.name == user.name)) //아직 친구가 아니면
+      // {
+      //   _friends.add(Friend(name: user.name, emoji: user.emoji)); //친구 목록에 추가
+      // }
       notifyListeners(); //상태 변경 알림
       return;
     }
@@ -161,16 +155,17 @@ class FriendRequestProvider extends ChangeNotifier //ChangeNotifier 상속
   //친구 요청 수락
   void acceptRequest(String requestId) //수락 메서드
   {
-    final index = _incomingRequests.indexWhere((req) => req.id == requestId); //요청 인덱스 찾기
+    // final index = _incomingRequests.indexWhere((req) => req.id == requestId); //요청 인덱스 찾기
 
-    if (index == -1) return; //요청이 없으면 무시
+    // if (index == -1) return; //요청이 없으면 무시
 
-    final req = _incomingRequests.removeAt(index); //요청 제거
+    // final req = _incomingRequests.removeAt(index); //요청 제거
 
-    if (!_friends.any((friend) => friend.name == req.name)) //아직 친구가 아니면
-    {
-      _friends.add(Friend(name: req.name, emoji: req.emoji)); //친구 목록에 추가
-    }
+    // if (!_friends.any((friend) => friend.name == req.name)) //아직 친구가 아니면
+    // {
+    //   _friends.add(Friend(name: req.name, emoji: req.emoji)); //친구 목록에 추가
+    // }
+    _incomingRequests.removeWhere((req) => req.id == requestId); //수신 요청에서 제거
     notifyListeners(); //상태 변경 알림
   }
 
@@ -182,9 +177,9 @@ class FriendRequestProvider extends ChangeNotifier //ChangeNotifier 상속
   }
 
   //친구 삭제
-  void removeFriend(String name) //친구 삭제 메서드
-  {
-    _friends.removeWhere((friend) => friend.name == name); //친구 목록에서 제거
-    notifyListeners(); //상태 변경 알림
-  }
+  // void removeFriend(String name) //친구 삭제 메서드
+  // {
+  //   _friends.removeWhere((friend) => friend.name == name); //친구 목록에서 제거
+  //   notifyListeners(); //상태 변경 알림
+  // }
 }

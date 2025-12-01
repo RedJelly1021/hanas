@@ -37,7 +37,7 @@ void main()
         ChangeNotifierProvider(create: (_) => FriendsProvider()), //친구 프로바이더 생성
         ChangeNotifierProvider(create: (_) => ChatProvider()), //채팅 프로바이더 생성
         ChangeNotifierProvider(create: (_) => FriendNicknameProvider()), //친구 닉네임 프로바이더 생성
-        ChangeNotifierProvider(create: (_) => FriendRequestProvider()), //친구 요청 프로바이더 생성)
+        ChangeNotifierProvider(create: (_) => FriendRequestProvider()), //친구 요청 프로바이더 생성
       ],
       child: const HanasApp(), //HANAS 앱
     ),

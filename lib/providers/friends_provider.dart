@@ -12,9 +12,16 @@ class FriendsProvider extends ChangeNotifier //친구 관리 프로바이더
     Friend(name: "유진", emoji: "🐼"),
     Friend(name: "서준", emoji: "🦊"),
     Friend(name: "현아", emoji: "🐧"),
+    Friend(name: "아람찌", emoji: "😍"),
+    Friend(name: "윤이", emoji: "👧🏻"),
+    Friend(name: "유리", emoji: "🌼"),
   ];
 
   List<Friend> get friends => List.unmodifiable(_friends); //친구 목록 getter
+  bool isFriend(String name)
+  {
+    return _friends.any((f) => f.name == name); //이름으로 친구 여부 확인
+  }
 
   // 2) 즐겨찾기
   final Set<String> _favorites = {}; //즐겨찾기 이름 집합
@@ -66,6 +73,7 @@ class FriendsProvider extends ChangeNotifier //친구 관리 프로바이더
   // 5) 친구 추가
   void addFriend(Friend friend) //친구 추가 메서드
   {
+    if (isFriend(friend.name)) return; //이미 친구면 무시
     _friends.add(friend); //추가
     notifyListeners(); //변경 사항 알림
   }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart'; //Flutter 기본 패키지
+import 'package:hanas/models/friend.dart';
+import 'package:hanas/providers/friends_provider.dart';
 import 'package:provider/provider.dart'; //상태 관리 패키지
 import 'package:hanas/widgets/hanas_card.dart'; //커스텀 카드 위젯
 import 'package:hanas/widgets/hanas_header.dart'; //커스텀 헤더 위젯
@@ -168,7 +170,7 @@ class _FriendAddScreenState extends State<FriendAddScreen> //친구 추가 화�
                               itemBuilder: (context, index) //아이템 빌더
                               {
                                 final user = searchResults[index]; //검색된 사용자
-                                final isFriend = friendRequestProvider.isMyFriend(user.name); //이미 친구인지
+                                final isFriend = context.read<FriendsProvider>().isFriend(user.name); //이미 친구인지 확인
                                 final hasIncoming = friendRequestProvider.hasIncomingRequest(user.name); //수신 요청 있는지
                                 final hasOutgoing = friendRequestProvider.hasOutgoingRequest(user.name); //발신 요청 있는
 
@@ -260,7 +262,9 @@ class _FriendAddScreenState extends State<FriendAddScreen> //친구 추가 화�
                                         (
                                           onPressed: () //버튼 눌렀을 때
                                           {
-                                            context.read<FriendRequestProvider>().sendFriendRequest(user); //친구 요청 보내기
+                                            final reqProvider = context.read<FriendRequestProvider>(); //친구 요청 제공자
+                                            final friendsProvider = context.read<FriendsProvider>(); //친구 제공자 가져오기
+                                            reqProvider.sendFriendRequest(user, friendsProvider); //친구 요청 보내기
                                           },
                                           child: Text //버튼 텍스트
                                           (
@@ -442,7 +446,16 @@ class _FriendAddScreenState extends State<FriendAddScreen> //친구 추가 화�
                                         (
                                           onPressed: () //버튼 눌렀을 때
                                           {
-                                            context.read<FriendRequestProvider>().acceptRequest(req.id); //친구 요청 수락
+                                            final reqProvider = context.read<FriendRequestProvider>(); //친구 요청 제공자
+                                            final friendProvider = context.read<FriendsProvider>(); //친구 제공자
+
+                                            final reqData = reqProvider.incomingRequests[index]; //요청 데이터
+                                            reqProvider.acceptRequest(req.id); //친구 요청 수락
+                                            friendProvider.addFriend(Friend //친구 추가
+                                            (
+                                              name: reqData.name, //이름
+                                              emoji: reqData.emoji, //이모지
+                                            ));
                                           },
                                           child: Text //버튼 텍스트
                                           (
