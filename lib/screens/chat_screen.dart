@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart'; //플러터 머티리얼 패키지
 import 'package:provider/provider.dart'; //프로바이더 패키지
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart'; //이모지 피커 패키지
 
 import 'package:hanas/models/friend.dart'; //친구 모델
 import 'package:hanas/models/chat_message.dart'; //채팅 메시지 모델
@@ -26,18 +25,16 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
   final TextEditingController _editController = TextEditingController(); //텍스트 컨트롤러
   final ScrollController _scrollController = ScrollController(); //스크롤 컨트롤러
 
-  bool _isEmojiPickerVisible = false; //이모지 선택기 표시 여부
   FocusNode _focusNode = FocusNode(); //포커스 노드
 
   bool _didMarkReadOnce = false; //읽음 상태 표시 변수
+  int _prevMessageCount = 0; //이전 메시지 개수 변수
 
   void _markRead(Friend friend) //메시지 읽음 상태 표시 메서드
   {
     final chatProvider = context.read<ChatProvider>(); //채팅 프로바이더 가져오기
     chatProvider.markAsRead(friend); //메시지 읽음 상태 업데이트
   }
-
-  int _prevMessageCount = 0; //이전 메시지 개수 변수
 
   @override
   void dispose() //해제 메서드
@@ -165,13 +162,6 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
     {
       _markRead(friend); //메시지 읽음 상태 표시
     });
-    WidgetsBinding.instance.addPostFrameCallback((_)
-    {
-      if (MediaQuery.of(context).viewInsets.bottom > 0 && _isEmojiPickerVisible) //키보드가 올라왔을 때
-      {
-        setState(() => _isEmojiPickerVisible = false); //이모지 선택기 숨기기
-      }
-    });
 
     final displayName = nicknameProvider.displayName(friend.name); // 표시용 이름 가져오기
 
@@ -184,339 +174,271 @@ class _ChatScreenState extends State<ChatScreen> //채팅 화면 상태 클래�
       _prevMessageCount = messages.length; //이전 메시지 개수 업데이트
     }
 
-    //키보드 올라올 때 아래로 스크롤    
-    WidgetsBinding.instance.addPostFrameCallback((_)
-    {
-      if (MediaQuery.of(context).viewInsets.bottom > 0) //키보드가 올라왔을 때
-      {
-        _scrollToBottom(); //아래로 스크롤
-      }
-    });
+    //키보드 올라올 때 아래로 스크롤 !! 필요시 사용
+    // WidgetsBinding.instance.addPostFrameCallback((_)
+    // {
+    //   if (MediaQuery.of(context).viewInsets.bottom > 0) //키보드가 올라왔을 때
+    //   {
+    //     _scrollToBottom(); //아래로 스크롤
+    //   }
+    // });
 
     return Scaffold //기본 화면 구조
     (
       backgroundColor: theme.background, //연한 핑크색 배경
-      body: Column //세로 레이아웃
-      (
-        children: //자식 위젯들
-        [
-          //헤더 영역
-          HanasHeader //헤더 위젯
-          (
-            title: GestureDetector
+      body: SafeArea(
+        child: Column //세로 레이아웃
+        (
+          children: //자식 위젯들
+          [
+            //헤더 영역
+            HanasHeader //헤더 위젯
             (
-              onTap: () //탭 이벤트
-              {
-                Navigator.pushNamed //친구 상세 화면으로 이동
-                (
-                  context, //빌드 컨텍스트
-                  '/friendDetail', //친구 상세 화면 경로
-                  arguments: friend, //친구 데이터 인자 전달
-                );
-              },
-              child: Row //가로 레이아웃
+              title: GestureDetector
               (
-                mainAxisAlignment: MainAxisAlignment.center, //가운데 정렬
-                children: //자식 위젯들
-                [
-                  Column //세로 레이아웃
-                  (
-                    crossAxisAlignment: CrossAxisAlignment.center, //가운데 정렬
-                    children: //자식 위젯들
-                    [
-                      Text //별명 또는 원래 이름 텍스트
-                      (
-                        displayName, //별명 있으면 별명, 없으면 원래 이름
-                        style: TextStyle //텍스트 스타일
-                        (
-                          fontSize: 17, //폰트 크기
-                          fontWeight: FontWeight.bold, //굵은 글씨
-                          color: theme.foreground, //텍스트 색상
-                        ),
-                      ),
-                      Text //프로필 보기 텍스트
-                      (
-                        "프로필 보기", //텍스트 내용
-                        style: TextStyle //텍스트 스타일
-                        (
-                          fontSize: 11, //폰트 크기
-                          color: theme.foreground.withOpacity(0.6), //텍스트 색상
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            onBack: () => Navigator.pop(context), //뒤로가기 콜백
-          ),
-
-          //메시지 표시 영역
-          Expanded //확장 위젯
-          (
-            child: ListView.builder //메시지 리스트뷰
-            (
-              controller: _scrollController, //스크롤 컨트롤러
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), //패딩
-              itemCount: messages.length, //메시지 개수
-              itemBuilder: (_, index) //아이템 빌더
-              {
-                final msg = messages[index]; //현재 메시지
-                final showHeader = index == 0 ||
-                    !_isSameDay(msg.createdAt, messages[index - 1].createdAt); //날짜 헤더 표시 여부
-
-                return Column //세로 레이아웃
-                (
-                  children: //자식 위젯들
-                  [
-                    if (showHeader) //날짜 헤더 표시 여부
-                      _buildDateDivider(msg.createdAt, theme), //날짜 구분자
-                    ChatBubble //채팅 말풍선 위젯
-                    (
-                      message: msg, //메시지 데이터
-                      isEditing: _editingMessageId == msg.id, //편집 중인지 여부
-                      editingController: _editingMessageId == msg.id ? _editController : null, //편집 컨트롤러
-                      onEditSubmit: (newText) //편집 제출 콜백
-                      {
-                        final chatProvider = context.read<ChatProvider>(); //채팅 프로바이더 가져오기
-                        chatProvider.editMessage(friend, msg.id, newText); //메시지 업데이트
-                        setState(() => _editingMessageId = null); //편집 모드 종료
-                        _editController.clear(); //편집 컨트롤러 초기화
-                      },
-                      onLongPress: ()
-                      {
-                        _showMessageMenu(context, friend, msg); //메시지 메뉴 표시
-                      },
-                    )
-                  ],
-                );
-              },
-            ),
-          ),
-
-          //수정 모드 상태바
-          if (_editingMessageId != null)
-            Container //수정 모드 컨테이너
-            (
-              width: double.infinity, //가로 꽉 채우기
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), //패딩
-              decoration: BoxDecoration //박스 장식
-              (
-                color: theme.cardColor.withOpacity(0.9), //카드 배경색
-                border: Border //테두리
-                (
-                  bottom: BorderSide
-                  (
-                    color: theme.borderColor.withOpacity(0.3), 
-                    width: 1
-                  ), //아래쪽 테두리
-                ),
-              ),
-              child: Row //가로 레이아웃
-              (
-                mainAxisAlignment: MainAxisAlignment.spaceBetween, //양쪽 정렬
-                children: //자식 위젯들
-                [
-                  Row //가로 레이아웃
-                  (
-                    children: //자식 위젯들
-                    [
-                      const Icon(Icons.edit, size: 16), //편집 아이콘
-                      const SizedBox(width: 6), //간격
-                      Text //편집 중 텍스트
-                      (
-                        "메시지 수정 중...", //텍스트 내용
-                        style: TextStyle //텍스트 스타일
-                        (
-                          color: theme.foreground.withOpacity(0.8), //텍스트 색상
-                          fontSize: 13, //폰트 크기
-                        ),
-                      ),
-                    ],
-                  ),
-                  GestureDetector //탭 제스처 위젯
-                  (
-                    onTap: () 
-                    {
-                      setState(() => _editingMessageId = null); //편집 모드 종료
-                      _editController.clear(); //편집 컨트롤러 초기화  
-                    },
-                    child: Text //취소 텍스트
-                    (
-                      "취소", //텍스트 내용
-                      style: TextStyle //텍스트 스타일
-                      (
-                        color: theme.primary, //텍스트 색상
-                        fontSize: 13, //폰트 크기
-                        fontWeight: FontWeight.bold, //굵은 글씨
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-              
-          //메시지 입력 영역
-          Container //메시지 입력 컨테이너
-          (
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 18), //내부 여백
-            decoration: BoxDecoration //박스 장식
-            (
-              color: theme.cardColor, //카드 배경색
-              border: Border //테두리
-              (
-                top: BorderSide(color: theme.borderColor.withOpacity(0.8), width: 1), //위쪽 테두리
-              ),
-              boxShadow: //박스 그림자
-              [
-                BoxShadow //그림자
-                (
-                  color: theme.shadowColor.withOpacity(0.45), //그림자 색상
-                  blurRadius: 6, //흐림 반경
-                  offset: const Offset(0, -2), //그림자 위치
-                ),
-              ],
-            ),
-            child:  Row //가로 레이아웃
-            (
-              children: //자식 위젯들
-              [
-                // + 버튼 (파일/사진 등은 나중에)
-                IconButton //파일/사진 버튼
-                (
-                  icon: Icon //아이콘 버튼
-                  (
-                    Icons.add_circle_outline, //추가 아이콘
-                    color: theme.primary, //아이콘 색상
-                  ),
-                  onPressed: () //버튼 클릭 이벤트
-                  {
-                    ScaffoldMessenger.of(context).showSnackBar //스낵바 표시
-                    (
-                      const SnackBar(content: Text("사진/파일 보내기는 나중에!")), //스낵바 내용
-                    );
-                  },
-                ),
-
-                Expanded //확장 위젯
-                (
-                  child: Container //텍스트 입력 컨테이너
-                  (
-                    padding: const EdgeInsets.symmetric(horizontal: 12), //내부 여백
-                    decoration: BoxDecoration //박스 장식
-                    (
-                      color: theme.background, //배경색
-                      borderRadius: BorderRadius.circular(20), //둥근 테두리
-                      border: Border.all //테두리
-                      (
-                        color: theme.borderColor.withOpacity(0.7), //테두리 색상
-                        width: 1, //테두리 두께
-                      ),
-                    ),
-                    child: TextField //텍스트 필드
-                    (
-                      controller: _editController, //텍스트 컨트롤러
-                      focusNode: _focusNode, //포커스 노드
-                      style: TextStyle(color: theme.foreground), //텍스트 스타일
-                      decoration: InputDecoration //입력 장식
-                      (
-                        hintText: "메시지 입력...", //힌트 텍스트
-                        hintStyle: TextStyle //힌트 텍스트 스타일
-                        (
-                          color: theme.foreground.withOpacity(0.4), //힌트 텍스트 색상
-                        ),
-                        border: InputBorder.none, //테두리 없음
-                        //isCollapsed: true, //내부 여백 최소화
-                      ),
-                      onSubmitted: (_) => _sendMessage(friend), //엔터키로 전송
-                    ),
-                  ),
-                ),
-                //이모지 버튼
-                IconButton //이모지 버튼
-                (
-                  icon: Icon //아이콘 버튼
-                  (
-                    Icons.emoji_emotions_outlined, //이모지 아이콘
-                    color: theme.primary, //아이콘 색상
-                  ),
-                  onPressed: () //버튼 클릭 이벤트
-                  {
-                    FocusScope.of(context).unfocus(); //포커스 해제
-                    setState(() => _isEmojiPickerVisible = !_isEmojiPickerVisible); //이모지 선택기 표시 토글
-                  },
-                ),
-
-                //전송 버튼
-                IconButton //전송 버튼
-                (
-                  icon: Icon //아이콘 버튼
-                  (
-                    Icons.send, //전송 아이콘
-                    color: theme.primary, //아이콘 색상
-                  ), //핑크색 전송 아이콘
-                  onPressed : () => _sendMessage(friend), //전송 버튼 클릭
-                ),
-            ],
-            ),
-          ),
-        
-          //이모지 선택기
-          if (_isEmojiPickerVisible)
-            SizedBox //이모지 선택기 공간
-            (
-              height: 280, //높이 설정
-              child: EmojiPicker
-              (
-                onEmojiSelected: (category, emoji) //이모지 선택 콜백
+                onTap: () //탭 이벤트
                 {
-                  _editController.text += emoji.emoji; //텍스트 필드에 이모지 추가
-                  _editController.selection = TextSelection.fromPosition //커서 위치 설정
+                  Navigator.pushNamed //친구 상세 화면으로 이동
                   (
-                    TextPosition(offset: _editController.text.length) //텍스트 끝으로 커서 이동
+                    context, //빌드 컨텍스트
+                    '/friendDetail', //친구 상세 화면 경로
+                    arguments: friend, //친구 데이터 인자 전달
                   );
                 },
-                config: Config(
-                  height: 260,
-                  checkPlatformCompatibility: true,
-                  locale: const Locale('ko'),
-                  emojiViewConfig: EmojiViewConfig
-                  (
-                    emojiSizeMax: 28,
-                    columns: 7,
-                    backgroundColor: theme.background,
-                    verticalSpacing: 6,
-                    horizontalSpacing: 6,
-                  ),
-                  categoryViewConfig: CategoryViewConfig
-                  (
-                    backgroundColor: theme.cardColor,
-                    iconColor: theme.foreground.withOpacity(0.4),
-                    iconColorSelected: theme.primary,
-                    indicatorColor: theme.primary,
-                    initCategory: Category.SMILEYS,
-                  ),
-                  skinToneConfig: SkinToneConfig
-                  (
-                    enabled: true,
-                    dialogBackgroundColor: theme.cardColor,
-                    indicatorColor: theme.primary,
-                  ),
-                  bottomActionBarConfig: BottomActionBarConfig
-                  (
-                    enabled: true,
-                    backgroundColor: theme.cardColor,
-                    buttonIconColor: theme.primary,
-                  ),
-                  customBackspaceIcon: Icon
-                  (
-                    Icons.backspace_rounded,
-                    color: theme.primary,
-                  ),
+                child: Row //가로 레이아웃
+                (
+                  mainAxisAlignment: MainAxisAlignment.center, //가운데 정렬
+                  children: //자식 위젯들
+                  [
+                    Column //세로 레이아웃
+                    (
+                      crossAxisAlignment: CrossAxisAlignment.center, //가운데 정렬
+                      children: //자식 위젯들
+                      [
+                        Text //별명 또는 원래 이름 텍스트
+                        (
+                          displayName, //별명 있으면 별명, 없으면 원래 이름
+                          style: TextStyle //텍스트 스타일
+                          (
+                            fontSize: 17, //폰트 크기
+                            fontWeight: FontWeight.bold, //굵은 글씨
+                            color: theme.foreground, //텍스트 색상
+                          ),
+                        ),
+                        Text //프로필 보기 텍스트
+                        (
+                          "프로필 보기", //텍스트 내용
+                          style: TextStyle //텍스트 스타일
+                          (
+                            fontSize: 11, //폰트 크기
+                            color: theme.foreground.withOpacity(0.6), //텍스트 색상
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
+              onBack: () => Navigator.pop(context), //뒤로가기 콜백
             ),
-        ],
+        
+            //메시지 표시 영역
+            Expanded //확장 위젯
+            (
+              child: ListView.builder //메시지 리스트뷰
+              (
+                controller: _scrollController, //스크롤 컨트롤러
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), //패딩
+                itemCount: messages.length, //메시지 개수
+                itemBuilder: (_, index) //아이템 빌더
+                {
+                  final msg = messages[index]; //현재 메시지
+                  final showHeader = index == 0 ||
+                      !_isSameDay(msg.createdAt, messages[index - 1].createdAt); //날짜 헤더 표시 여부
+        
+                  return Column //세로 레이아웃
+                  (
+                    children: //자식 위젯들
+                    [
+                      if (showHeader) //날짜 헤더 표시 여부
+                        _buildDateDivider(msg.createdAt, theme), //날짜 구분자
+                      ChatBubble //채팅 말풍선 위젯
+                      (
+                        message: msg, //메시지 데이터
+                        isEditing: _editingMessageId == msg.id, //편집 중인지 여부
+                        editingController: _editingMessageId == msg.id ? _editController : null, //편집 컨트롤러
+                        onEditSubmit: (newText) //편집 제출 콜백
+                        {
+                          final chatProvider = context.read<ChatProvider>(); //채팅 프로바이더 가져오기
+                          chatProvider.editMessage(friend, msg.id, newText); //메시지 업데이트
+                          setState(() => _editingMessageId = null); //편집 모드 종료
+                          _editController.clear(); //편집 컨트롤러 초기화
+                        },
+                        onLongPress: ()
+                        {
+                          _showMessageMenu(context, friend, msg); //메시지 메뉴 표시
+                        },
+                      )
+                    ],
+                  );
+                },
+              ),
+            ),
+        
+            //수정 모드 상태바
+            if (_editingMessageId != null)
+              Container //수정 모드 컨테이너
+              (
+                width: double.infinity, //가로 꽉 채우기
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), //패딩
+                decoration: BoxDecoration //박스 장식
+                (
+                  color: theme.cardColor.withOpacity(0.9), //카드 배경색
+                  border: Border //테두리
+                  (
+                    bottom: BorderSide
+                    (
+                      color: theme.borderColor.withOpacity(0.3), 
+                      width: 1
+                    ), //아래쪽 테두리
+                  ),
+                ),
+                child: Row //가로 레이아웃
+                (
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween, //양쪽 정렬
+                  children: //자식 위젯들
+                  [
+                    Row //가로 레이아웃
+                    (
+                      children: //자식 위젯들
+                      [
+                        const Icon(Icons.edit, size: 16), //편집 아이콘
+                        const SizedBox(width: 6), //간격
+                        Text //편집 중 텍스트
+                        (
+                          "메시지 수정 중...", //텍스트 내용
+                          style: TextStyle //텍스트 스타일
+                          (
+                            color: theme.foreground.withOpacity(0.8), //텍스트 색상
+                            fontSize: 13, //폰트 크기
+                          ),
+                        ),
+                      ],
+                    ),
+                    GestureDetector //탭 제스처 위젯
+                    (
+                      onTap: () 
+                      {
+                        setState(() => _editingMessageId = null); //편집 모드 종료
+                        _editController.clear(); //편집 컨트롤러 초기화  
+                      },
+                      child: Text //취소 텍스트
+                      (
+                        "취소", //텍스트 내용
+                        style: TextStyle //텍스트 스타일
+                        (
+                          color: theme.primary, //텍스트 색상
+                          fontSize: 13, //폰트 크기
+                          fontWeight: FontWeight.bold, //굵은 글씨
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+                
+            //메시지 입력 영역
+            Container //메시지 입력 컨테이너
+            (
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 18), //내부 여백
+              decoration: BoxDecoration //박스 장식
+              (
+                color: theme.cardColor, //카드 배경색
+                border: Border //테두리
+                (
+                  top: BorderSide(color: theme.borderColor.withOpacity(0.8), width: 1), //위쪽 테두리
+                ),
+                boxShadow: //박스 그림자
+                [
+                  BoxShadow //그림자
+                  (
+                    color: theme.shadowColor.withOpacity(0.45), //그림자 색상
+                    blurRadius: 6, //흐림 반경
+                    offset: const Offset(0, -2), //그림자 위치
+                  ),
+                ],
+              ),
+              child:  Row //가로 레이아웃
+              (
+                children: //자식 위젯들
+                [
+                  // + 버튼 (파일/사진 등은 나중에)
+                  IconButton //파일/사진 버튼
+                  (
+                    icon: Icon //아이콘 버튼
+                    (
+                      Icons.add_circle_outline, //추가 아이콘
+                      color: theme.primary, //아이콘 색상
+                    ),
+                    onPressed: () //버튼 클릭 이벤트
+                    {
+                      ScaffoldMessenger.of(context).showSnackBar //스낵바 표시
+                      (
+                        const SnackBar(content: Text("사진/파일 보내기는 나중에!")), //스낵바 내용
+                      );
+                    },
+                  ),
+        
+                  Expanded //확장 위젯
+                  (
+                    child: Container //텍스트 입력 컨테이너
+                    (
+                      padding: const EdgeInsets.symmetric(horizontal: 12), //내부 여백
+                      decoration: BoxDecoration //박스 장식
+                      (
+                        color: theme.background, //배경색
+                        borderRadius: BorderRadius.circular(20), //둥근 테두리
+                        border: Border.all //테두리
+                        (
+                          color: theme.borderColor.withOpacity(0.7), //테두리 색상
+                          width: 1, //테두리 두께
+                        ),
+                      ),
+                      child: TextField //텍스트 필드
+                      (
+                        controller: _editController, //텍스트 컨트롤러
+                        focusNode: _focusNode, //포커스 노드
+                        style: TextStyle(color: theme.foreground), //텍스트 스타일
+                        decoration: InputDecoration //입력 장식
+                        (
+                          hintText: "메시지 입력...", //힌트 텍스트
+                          hintStyle: TextStyle //힌트 텍스트 스타일
+                          (
+                            color: theme.foreground.withOpacity(0.4), //힌트 텍스트 색상
+                          ),
+                          border: InputBorder.none, //테두리 없음
+                          //isCollapsed: true, //내부 여백 최소화
+                        ),
+                        onSubmitted: (_) => _sendMessage(friend), //엔터키로 전송
+                      ),
+                    ),
+                  ),
+        
+                  //전송 버튼
+                  IconButton //전송 버튼
+                  (
+                    icon: Icon //아이콘 버튼
+                    (
+                      Icons.send, //전송 아이콘
+                      color: theme.primary, //아이콘 색상
+                    ), //핑크색 전송 아이콘
+                    onPressed : () => _sendMessage(friend), //전송 버튼 클릭
+                  ),
+              ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
