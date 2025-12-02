@@ -5,16 +5,18 @@ import 'package:hanas/providers/friends_provider.dart'; //FriendsProvider 임포
 //친구 검색용 간단 유저 모델
 class HanasUserStub
 {
+  final String userId; //유저 ID
   final String name; //유저 이름
   final String emoji; //유저 이모지
 
-  HanasUserStub(this.name, this.emoji); //생성자
+  HanasUserStub(this.userId, this.name, this.emoji); //생성자
 }
 
 //친구 요청 모델
 class FriendRequest
 {
   final String id; //요청 ID
+  final String userId; //요청자 유저 ID
   final String name; //요청자 이름
   final String emoji; //요청자 이모지
   final bool inIncoming; //true = 수신 요청, false = 발신 요청
@@ -22,6 +24,7 @@ class FriendRequest
   FriendRequest //생성자
   ({
     required this.id, //요청 ID
+    required this.userId, //요청자 유저 ID
     required this.name, //요청자 이름
     required this.emoji, //요청자 이모지
     required this.inIncoming, //수신/발신 여부
@@ -43,17 +46,17 @@ class FriendRequestProvider extends ChangeNotifier //ChangeNotifier 상속
   //앱 안에서만 쓰는 더미 유저 목록 (Firebase 붙이기 전용)
   final List<HanasUserStub> _mockUsers = //모의 유저 데이터
   [
-    HanasUserStub("아람찌", "😍"),
-    HanasUserStub("윤이", "👧🏻"),
-    HanasUserStub("유리", "🌼"),
+    HanasUserStub("7", "아람찌", "😍"),
+    HanasUserStub("8", "윤이", "👧🏻"),
+    HanasUserStub("9", "유리", "🌼"),
 
-    HanasUserStub("하늘", "☁️"),
-    HanasUserStub("민지", "🐰"),
-    HanasUserStub("현우", "🐻"),
-    HanasUserStub("다현", "🌸"),
-    HanasUserStub("서준", "🌊"),
-    HanasUserStub("지우", "⭐"),
-    HanasUserStub("예린", "🌼"),
+    HanasUserStub("10", "하늘", "☁️"),
+    HanasUserStub("11", "민지", "🐰"),
+    HanasUserStub("12", "현우", "🐻"),
+    HanasUserStub("13", "다현", "🌸"),
+    HanasUserStub("14", "서준", "🌊"),
+    HanasUserStub("15", "지우", "⭐"),
+    HanasUserStub("16", "예린", "🌼"),
   ];
 
   FriendRequestProvider() //생성자
@@ -63,14 +66,16 @@ class FriendRequestProvider extends ChangeNotifier //ChangeNotifier 상속
     ([
       FriendRequest //생성자
       (
-        id: "req1",
+        id: "req10",
+        userId: "10",
         name: "하늘",
         emoji: "☁️",
         inIncoming: true,
       ),
       FriendRequest //생성자
       (
-        id: "req2",
+        id: "req11",
+        userId: "11",
         name: "민지",
         emoji: "🐰",
         inIncoming: true,
@@ -128,7 +133,7 @@ class FriendRequestProvider extends ChangeNotifier //ChangeNotifier 상속
     if (existingIncoming.isNotEmpty) //기존 수신 요청이 있으면
     {
       _incomingRequests.removeWhere((req) => req.name == user.name); //기존 수신 요청 제거
-      friendsProvider.addFriend(Friend(name: user.name, emoji: user.emoji)); //친구 목록에 추가
+      friendsProvider.addFriend(Friend(id: user.userId, name: user.name, emoji: user.emoji)); //친구 목록에 추가
 
       // if (!_friends.any((friend) => friend.name == user.name)) //아직 친구가 아니면
       // {
@@ -144,6 +149,7 @@ class FriendRequestProvider extends ChangeNotifier //ChangeNotifier 상속
       FriendRequest //생성자
       (
         id: "out_${user.name}_${DateTime.now().millisecondsSinceEpoch}", //고유 ID 생성
+        userId: user.userId, //요청자 유저 ID
         name: user.name, //요청자 이름
         emoji: user.emoji, //요청자 이모지
         inIncoming: false, //발신 요청

@@ -6,15 +6,15 @@ class FriendsProvider extends ChangeNotifier //친구 관리 프로바이더
   // 1) 친구 목록 (기존 mockFriends)
   final List<Friend> _friends = 
   [
-    Friend(name: "민수", emoji: "🐱"),
-    Friend(name: "지연", emoji: "🐰"),
-    Friend(name: "다희", emoji: "🐻"),
-    Friend(name: "유진", emoji: "🐼"),
-    Friend(name: "서준", emoji: "🦊"),
-    Friend(name: "현아", emoji: "🐧"),
-    Friend(name: "아람찌", emoji: "😍"),
-    Friend(name: "윤이", emoji: "👧🏻"),
-    Friend(name: "유리", emoji: "🌼"),
+    Friend(id: "1", name: "민수", emoji: "🐱"),
+    Friend(id: "2", name: "지연", emoji: "🐰"),
+    Friend(id: "3", name: "다희", emoji: "🐻"),
+    Friend(id: "4", name: "유진", emoji: "🐼"),
+    Friend(id: "5", name: "서준", emoji: "🦊"),
+    Friend(id: "6", name: "현아", emoji: "🐧"),
+    Friend(id: "7", name: "아람찌", emoji: "😍"),
+    Friend(id: "8", name: "윤이", emoji: "👧🏻"),
+    Friend(id: "9", name: "유리", emoji: "🌼"),
   ];
 
   List<Friend> get friends => List.unmodifiable(_friends); //친구 목록 getter

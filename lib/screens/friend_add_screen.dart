@@ -453,6 +453,7 @@ class _FriendAddScreenState extends State<FriendAddScreen> //친구 추가 화�
                                             reqProvider.acceptRequest(req.id); //친구 요청 수락
                                             friendProvider.addFriend(Friend //친구 추가
                                             (
+                                              id: reqData.userId, //ID
                                               name: reqData.name, //이름
                                               emoji: reqData.emoji, //이모지
                                             ));

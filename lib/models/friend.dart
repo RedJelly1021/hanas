@@ -1,10 +1,12 @@
 class Friend // Model for a friend with a name and an emoji
 {
+  final String id; // Friend's unique identifier
   final String name; // Friend's name
   final String emoji; // Friend's emoji representation
 
   Friend // Constructor
   ({
+    required this.id, // Friend's unique identifier
     required this.name, // Friend's name
     required this.emoji, // Friend's emoji representation
   });
@@ -13,6 +15,7 @@ class Friend // Model for a friend with a name and an emoji
   {
     return Friend // Return a new Friend instance
     (
+      id: map['userId'] ?? map['id'] ?? '', // Assign id from map or default to empty string
       name: map['name'] ?? '', // Assign name from map or default to empty string
       emoji: map['emoji'] ?? '', // Assign emoji from map or default to empty string
     );
@@ -22,6 +25,7 @@ class Friend // Model for a friend with a name and an emoji
   {
     return // Return a map representation of the Friend
     {
+      'userId': id, // Friend's unique identifier
       'name': name, // Friend's name
       'emoji': emoji, // Friend's emoji representation
     };
