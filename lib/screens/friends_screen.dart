@@ -4,6 +4,8 @@ import 'package:hanas/widgets/hanas_card.dart'; //커스텀 카드 위젯
 import 'package:hanas/widgets/hanas_header.dart'; //커스텀 헤더 위젯
 import 'package:hanas/providers/theme_provider.dart'; //테마 제공자
 import 'package:hanas/providers/friends_provider.dart'; //친구 제공자
+import 'package:hanas/providers/user_profile_provider.dart'; //사용자 프로필 제공자
+import 'package:hanas/providers/firestore_friend_provider.dart'; //Firestore 친구 제공자
 
 class FriendsScreen extends StatefulWidget //친구 목록 화면 클래스
 {
@@ -18,18 +20,32 @@ class _FriendsScreenState extends State<FriendsScreen> //친구 목록 화면 �
   String _searchQuery = ""; //검색 쿼리 상태 변수
 
   @override
+  void initState() //초기화 메서드
+  {
+    super.initState(); //부모 초기화 호출
+
+    //Firestore 친구 제공자에서 실시간 친구 목록 구독 시작
+    WidgetsBinding.instance.addPostFrameCallback((_) 
+    {
+      final myUserId = Provider.of<UserProfileProvider>(context, listen: false).userId; //내 사용자 ID 가져오기
+      Provider.of<FirestoreFriendProvider>(context, listen: false).listenToFriends(myUserId); //실시간 친구 목록 구독 시작
+    });
+  }
+
+  @override
   Widget build(BuildContext context) //빌드 메서드
   {
     final theme = context.watch<ThemeProvider>().currentTheme; //현재 테마 가져오기
-    final friendsProvider = context.watch<FriendsProvider>(); //친구 제공자 가져오기
+    final nicknameFavProvider = context.watch<FriendsProvider>(); //친구 제공자 가져오기
+    final firestoreFriendProvider = context.watch<FirestoreFriendProvider>(); //Firestore 친구 제공자 가져오기
 
     //1) Provider에서 친구 목록 가져오기
-    final friends = friendsProvider.friends; //내 친구 목록 가져오기
+    final friends = firestoreFriendProvider.friends; //내 친구 목록 가져오기
 
     //2) 검색 + 즐겨찾기 정렬 있으면 같이 처리
     final filtered = friends.where((friend) //검색 필터링
     {
-      final display = friendsProvider.displayName(friend.name); //표시용 이름 가져오기
+      final display = nicknameFavProvider.displayName(friend.name); //표시용 이름 가져오기
       if(_searchQuery.isEmpty) return true; //검색어 없으면 모두 표시
       return display.contains(_searchQuery) || friend.name.contains(_searchQuery); //이름 또는 별명에 검색어 포함 여부
     }).toList();
@@ -37,8 +53,8 @@ class _FriendsScreenState extends State<FriendsScreen> //친구 목록 화면 �
     //3) 즐겨찾기 우선 정렬
     final sortedFriends = [...filtered]; //필터링된 친구 목록 복사
     sortedFriends.sort((a, b) { //즐겨찾기 우선 정렬
-      final aFav = friendsProvider.isFavorite(a.name); //a가 즐겨찾기인지
-      final bFav = friendsProvider.isFavorite(b.name); //b가 즐겨찾기인지
+      final aFav = nicknameFavProvider.isFavorite(a.name); //a가 즐겨찾기인지
+      final bFav = nicknameFavProvider.isFavorite(b.name); //b가 즐겨찾기인지
       if (aFav&&!bFav) return -1; //a가 즐겨찾기고 b가 아니면 a가 먼저
       if (!aFav&&bFav) return 1; //b가 즐겨찾기고 a가 아니면 b가 먼저
       return a.name.compareTo(b.name); //둘 다 같으면 이름순 정렬
@@ -161,7 +177,7 @@ class _FriendsScreenState extends State<FriendsScreen> //친구 목록 화면 �
                     title: Text //친구 이름
                     (
                       //friend.name, //이름 텍스트
-                      friendsProvider.displayName(friend.name), //별명 있으면 별명, 없으면 원래 이름
+                      nicknameFavProvider.displayName(friend.name), //별명 있으면 별명, 없으면 원래 이름
                       style: TextStyle //텍스트 스타일
                       (
                         fontSize: 18, //글자 크기
@@ -179,14 +195,14 @@ class _FriendsScreenState extends State<FriendsScreen> //친구 목록 화면 �
                           behavior: HitTestBehavior.translucent, //투명한 영역도 탭 감지
                           onTap: () //탭했을 때
                           {
-                            friendsProvider.toggleFavorite(friend.name); //즐겨찾기 토글
+                            nicknameFavProvider.toggleFavorite(friend.name); //즐겨찾기 토글
                           },
                           child: Icon //즐겨찾기 아이콘
                           (
-                            friendsProvider.isFavorite(friend.name) //즐겨찾기 여부에 따른 아이콘
+                            nicknameFavProvider.isFavorite(friend.name) //즐겨찾기 여부에 따른 아이콘
                                 ? Icons.star //즐겨찾기 아이콘
                                 : Icons.star_border, //비즐겨찾기 아이콘
-                            color: friendsProvider.isFavorite(friend.name) //아이콘 색상
+                            color: nicknameFavProvider.isFavorite(friend.name) //아이콘 색상
                                 ? theme.primary //즐겨찾기면 주요 색상
                                 : theme.foreground.withOpacity(0.4), //비즐겨찾기면 연한 색상
                           ),
