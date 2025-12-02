@@ -2,6 +2,7 @@ import 'package:flutter/material.dart'; //Flutter 기본 위젯
 import 'package:provider/provider.dart'; //상태 관리를 위한 Provider 패키지
 import 'package:hanas/providers/theme_provider.dart'; //테마 관련 프로바이더
 import 'package:hanas/providers/user_profile_provider.dart'; //사용자 프로필 관련 프로바이더
+import 'package:hanas/providers/firestore_user_provider.dart'; // Firestore 유저 프로바이더
 
 class LoginScreen extends StatefulWidget //로그인 화면 위젯
 {
@@ -23,7 +24,7 @@ class _LoginScreenState extends State<LoginScreen> //로그인 화면 상태 클
     super.dispose(); //부모 클래스의 dispose 호출
   }
 
-  void _login() //로그인 처리 메서드
+  void _login() async//로그인 처리 메서드
   {
     final userId = _userIdController.text.trim(); //닉네임 가져오기
 
@@ -37,7 +38,9 @@ class _LoginScreenState extends State<LoginScreen> //로그인 화면 상태 클
     final profile = Provider.of<UserProfileProvider>(context, listen: false); //프로필 프로바이더 가져오기
     profile.setUserId(userId); //닉네임 설정
 
-    //TODO: 실제 로그인 로직은 나중에 Firebase 붙일 때 넣기
+    final firestoreUser = Provider.of<FirestoreUserProvider>(context, listen: false); // Firestore 유저 프로바이더 가져오기
+    await firestoreUser.loadUser(userId, profile); // Firestore에서 유저 데이터 로드
+    
     Navigator.pushReplacementNamed(context, '/friends'); //친구 목록 화면으로 이동
     //Navigator.pushReplacementNamed(context, '/chatList'); //원하면 로그인 성공 시 채팅 목록 화면으로 이동
     //Navigator.pushReplacementNamed(context, '/home'); //원하면 로그인 성공 시 Home(Friends+Chats) 화면으로 이동
