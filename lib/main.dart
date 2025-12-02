@@ -23,6 +23,9 @@ import 'package:hanas/providers/friends_provider.dart'; //친구 프로바이더
 import 'package:hanas/providers/user_profile_provider.dart'; //유저 프로필 프로바이더 임포트
 import 'package:hanas/providers/friend_request_provider.dart'; //친구 요청 프로바이더 임포트
 import 'package:hanas/providers/friend_nickname_provider.dart'; //친구 닉네임 프로바이더 임포트
+import 'package:hanas/providers/firestore_friend_provider.dart'; // Firestore 친구 프로바이더 임포트
+import 'package:hanas/providers/firestore_user_provider.dart'; // Firestore 유저 프로바이더 임포트
+import 'package:hanas/providers/firestore_chat_provider.dart'; // Firestore 채팅 프로바이더 임포트
 
 void main() async
 {
@@ -42,6 +45,11 @@ void main() async
         ChangeNotifierProvider(create: (_) => ChatProvider()), //채팅 프로바이더 생성
         ChangeNotifierProvider(create: (_) => FriendNicknameProvider()), //친구 닉네임 프로바이더 생성
         ChangeNotifierProvider(create: (_) => FriendRequestProvider()), //친구 요청 프로바이더 생성
+
+        // Firestore 기반 프로바이더들 생성 (연동 예정)
+        ChangeNotifierProvider(create: (_) => FirestoreFriendProvider()), // Firestore 친구 프로바이더 생성
+        ChangeNotifierProvider(create: (_) => FirestoreUserProvider()), // Firestore 유저 프로바이더 생성
+        ChangeNotifierProvider(create: (_) => FirestoreChatProvider()), // Firestore 채팅 프로바이더 생성
       ],
       child: const HanasApp(), //HANAS 앱
     ),
