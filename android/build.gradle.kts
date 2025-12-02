@@ -11,8 +11,10 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // Google Services 플러그인 추가
-        classpath("com.google.gms:google-services:4.4.0")
+        classpath 'com.android.tools.build:gradle:7.3.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        // 🔥 Firebase Gradle Plugin
+        classpath 'com.google.gms:google-services:4.4.2'
     }
 }
 

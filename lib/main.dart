@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart'; //플러터 머티리얼 패키지 임포트
 import 'package:provider/provider.dart'; //프로바이더 패키지 임포트
+import 'package:firebase_core/firebase_core.dart'; //파이어베이스 코어 패키지 임포트
+import 'firebase_options.dart'; //파이어베이스 옵션 임포트
 
 import 'package:hanas/models/friend.dart'; //Friend 모델 임포트
 
@@ -22,11 +24,13 @@ import 'package:hanas/providers/user_profile_provider.dart'; //유저 프로필 
 import 'package:hanas/providers/friend_request_provider.dart'; //친구 요청 프로바이더 임포트
 import 'package:hanas/providers/friend_nickname_provider.dart'; //친구 닉네임 프로바이더 임포트
 
-void main()
+void main() async
 {
   //main.dart
-  //WidgetsFlutterBinding.ensureInitialized(); // Missing parentheses added here
-  //runApp(const HanasApp()); //HANAS 앱 실행
+  WidgetsFlutterBinding.ensureInitialized(); //플러터 바인딩 초기화
+  await Firebase.initializeApp( //파이어베이스 초기화
+    options: DefaultFirebaseOptions.currentPlatform, //플랫폼별 옵션 적용
+  );
   runApp //프로바이더 적용
   (
     MultiProvider //ChangeNotifierProvider로 감싸기
