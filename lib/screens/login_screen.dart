@@ -13,35 +13,29 @@ class LoginScreen extends StatefulWidget //로그인 화면 위젯
 
 class _LoginScreenState extends State<LoginScreen> //로그인 화면 상태 클래스
 {
-  final TextEditingController _nameController = TextEditingController(); //닉네임 입력 컨트롤러
+  final TextEditingController _userIdController = TextEditingController(); //닉네임 입력 컨트롤러
+  String _errorText = ''; //오류 메시지 텍스트
 
   @override
   void dispose() //리소스 해제
   {
-    _nameController.dispose(); //컨트롤러 해제
+    _userIdController.dispose(); //컨트롤러 해제
     super.dispose(); //부모 클래스의 dispose 호출
   }
 
   void _login() //로그인 처리 메서드
   {
-    final name = _nameController.text.trim(); //닉네임 가져오기
+    final userId = _userIdController.text.trim(); //닉네임 가져오기
 
-    if (name.isEmpty) //닉네임이 비어있는 경우
+    if (userId.isEmpty) //닉네임이 비어있는 경우
     {
-      ScaffoldMessenger.of(context).showSnackBar //Snackbar 표시
-      (
-        const SnackBar //Snackbar 위젯
-        (
-          content: Text('닉네임을 입력하세요!'), //경고 메시지
-          duration: Duration(seconds: 1), //1초 동안 표시
-        )
-      );
+      setState(() =>_errorText = 'User ID를 입력하세요!'); //오류 메시지 설정
       return;
     }
 
     //닉네임을 전역 프로필 상태에 반영
     final profile = Provider.of<UserProfileProvider>(context, listen: false); //프로필 프로바이더 가져오기
-    profile.setNickname(name); //닉네임 설정
+    profile.setUserId(userId); //닉네임 설정
 
     //TODO: 실제 로그인 로직은 나중에 Firebase 붙일 때 넣기
     Navigator.pushReplacementNamed(context, '/friends'); //친구 목록 화면으로 이동
@@ -85,13 +79,13 @@ class _LoginScreenState extends State<LoginScreen> //로그인 화면 상태 클
               ),
               const SizedBox(height: 40), //제목과 입력창 사이 간격
 
-              //닉네임 입력 필드
-              TextField //닉네임 입력창
+              //사용자 ID 입력 필드
+              TextField //사용자 ID 입력창
               (
-                controller: _nameController, //컨트롤러 연결
+                controller: _userIdController, //컨트롤러 연결
                 decoration: InputDecoration //입력창 꾸미기
                 (
-                  labelText: '닉네임', //레이블 텍스트
+                  labelText: 'User ID', //레이블 텍스트
                   filled: true, //채워진 스타일
                   fillColor: theme.cardColor, //카드 배경색
                   labelStyle: TextStyle(color: theme.foreground), //레이블 색상
@@ -107,6 +101,16 @@ class _LoginScreenState extends State<LoginScreen> //로그인 화면 상태 클
                   ),
                 ),
               ),
+              if (_errorText.isNotEmpty) //오류 메시지 표시
+                Padding
+                (
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text //오류 메시지 텍스트
+                  (
+                    _errorText, //오류 메시지
+                    style: TextStyle(color: Colors.redAccent), //오류 색상
+                  ),
+                ),
 
               const SizedBox(height: 30), //입력창과 버튼 사이 간격
               
@@ -129,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> //로그인 화면 상태 클
                   ),
                   child: Text //버튼 텍스트
                   (
-                    '입장하기', //버튼 텍스트
+                    '로그인', //버튼 텍스트
                     style: TextStyle(fontSize: 18, color: theme.bubbleOther), //폰트 크기 및 색상
                   ),
                 ),
